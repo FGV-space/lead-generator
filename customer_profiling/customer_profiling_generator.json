@@ -325,7 +325,7 @@
           "value": "nwua9Gu5YrADL7ZDj",
           "mode": "list",
           "cachedResultName": "Google Maps Scraper (compass/crawler-google-places)",
-          "cachedResultUrl": "https://console.apify.com/actors/nwua9Gu5YrADL7ZDj/input"
+          "cachedResultUrl": "YOUR_URL"
         },
         "customBody": "={\n   \"categoryFilterWords\": [\n        \"manufacturer\",\n        \"industrial equipment supplier\",\n        \"metal fabricator\",\n        \"construction company\",\n        \"mechanic\",\n        \"warehouse\",\n        \"agricultural machinery manufacturer\",\n        \"farm\",\n        \"agriculture\",\n        \"builder\",\n        \"logistics service\",\n        \"company\",\n        \"energy supplier\",\n        \"power station\",\n        \"metal industry suppliers\",\n        \"shipping equipment industry\"\n    ],\n\"includeWebResults\": true,\n    \"language\": \"en\",\n    \"locationQuery\": \"{{ $json.Luogo }}\",\n    \"maxImages\": 0,\n    \"maxQuestions\": 999,\n   \"maxCrawledPlacesPerSearch\":{{ $json['numero contatti da cercare'] }},\n    \"scrapeContacts\": true,\n    \"scrapeDirectories\": false,\n    \"scrapeImageAuthors\": false,\n    \"scrapePlaceDetailPage\": false,\n    \"scrapeReviewsPersonalData\": false,\n    \"scrapeTableReservationProvider\": false,\n    \"searchStringsArray\": [\n    {{ $json.option }}\n    ],\n        \"skipClosedPlaces\": false\n}",
         "timeout": {},
@@ -421,14 +421,14 @@
           "value": "125O9Nj8pZ2fBvFbmPrjzX_nxT59aPdGsVL7tpmeJedU",
           "mode": "list",
           "cachedResultName": "categorie",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/125O9Nj8pZ2fBvFbmPrjzX_nxT59aPdGsVL7tpmeJedU/edit?usp=drivesdk"
+          "cachedResultUrl": "YOUR_URL"
         },
         "sheetName": {
           "__rl": true,
           "value": 2022668042,
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/125O9Nj8pZ2fBvFbmPrjzX_nxT59aPdGsVL7tpmeJedU/edit#gid=2022668042"
+          "cachedResultUrl": "YOUR_URL"
         },
         "options": {}
       },
@@ -3301,4 +3301,5 @@
     "instanceId": "660880f982623eeaace6744b2306a46f4f544ee6aea73031f45b63423714d204"
   },
   "id": "I5OpkHliT8i207rD",
+
 }
