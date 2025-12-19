@@ -1,17 +1,17 @@
-# Lead Generator – Automated Workflow
+# Generatore di Lead – Workflow Automatizzato
 
-## Overview
-Automated lead generation system designed to collect, normalize and process leads
-using workflow automation and API integrations.
+## Panoramica
+Sistema automatizzato per la generazione di lead progettato per raccogliere, normalizzare e processare i lead
+utilizzando l’automazione dei workflow e integrazioni API.
 
-## Features
-- Automated data collection
-- API integration
-- Data normalization and validation
-- Error handling
-- Export to external systems
+## Funzionalità
+- Raccolta dati automatizzata
+- Integrazione API
+- Normalizzazione e validazione dei dati
+- Gestione degli errori
+- Esportazione verso sistemi esterni
 
-## Tech Stack
+## Tecnologie
 - n8n
 - JavaScript
-- REST APIs
+- REST API
