@@ -69,7 +69,7 @@
     },
     {
       "parameters": {
-        "url": "https://maps.googleapis.com/maps/api/geocode/json",
+        "url": "YOUR_LINK",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -311,7 +311,7 @@
     {
       "parameters": {
         "formTitle": "Trova Leads",
-        "formDescription": "per ottenere il corretto nome del luogo, utilizza questo link:\n\n<a href=\"https://nominatim.openstreetmap.org/search?q=%7D\">Mappa</a>",
+        "formDescription": "per ottenere il corretto nome del luogo, utilizza questo link:\n\n<a href=\"YOUR_LINK">Mappa</a>",
         "options": {}
       },
       "type": "n8n-nodes-base.formTrigger",
