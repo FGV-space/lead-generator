@@ -1,0 +1,3304 @@
+{
+  "name": "Generazione_LEAD",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "YOUR_API",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "lat",
+              "value": "={{ $json.latitudine}}"
+            },
+            {
+              "name": "lon",
+              "value": "={{ $json.longitudine }}"
+            },
+            {
+              "name": "peakpower",
+              "value": "15"
+            },
+            {
+              "name": "loss",
+              "value": "15"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2512,
+        -208
+      ],
+      "id": "1b567ecf-4af1-4921-a946-b5d7aa51711b",
+    },
+    {
+      "parameters": {
+        "jsCode": "// 🔹 Prende tutti gli input (7 nodi)\nconst inputs = $input.all();\n\nlet mergedJson = {};\nlet base64Image = \"\";\nlet mimeType = \"\";\n\n// 🔹 Scorri tutti gli input collegati\ninputs.forEach((item, index) => {\n  // Se l’input contiene JSON → uniscilo\n  if (item.json) {\n    Object.assign(mergedJson, item.json);\n  }\n\n  // Se è il 6° input (l'immagine), estrai base64 e mimeType\n  // NB: n8n usa indice 0-based, quindi index=5 è il sesto nodo\n  if (index === 5 && item.binary) {\n    for (const key of Object.keys(item.binary)) {\n      const file = item.binary[key];\n      if (file?.data) {\n        base64Image = file.data;\n        mimeType = file.mimeType || \"image/jpeg\";\n      }\n    }\n  }\n});\n\n// 🔹 Se trovata un’immagine, aggiungila al JSON\nif (base64Image) {\n  mergedJson.data = base64Image;\n  mergedJson.mimeType = mimeType;\n}\n\n// 🔹 Output finale\nreturn [{ json: mergedJson }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4064,
+        -32
+      ],
+      "id": "fa8be842-27d8-4e51-8a2d-068dee0ee89b",
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_API",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "(text/plain)",
+        "body": "=\n[out:json][timeout:600];\n\n// 🔍 Raggio di ricerca (in metri) attorno a una posizione\n(\n  node(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"power\"=\"generator\"][\"generator:source\"=\"solar\"];\n  node(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"power\"=\"generator\"][\"generator:method\"=\"photovoltaic\"];\n  node(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"generator:output:electricity\"];\n  node(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"generator:plant\"=\"solar\"];\n  node(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"generator:type\"=\"solar\"];\n  node(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"solar\"=\"yes\"];\n  node(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"power\"=\"plant\"][\"plant:source\"=\"solar\"];\n  node(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"generator:method\"=\"solar_photovoltaic\"];\n  node(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"location\"=\"roof\"][\"generator:source\"=\"solar\"];\n\n  way(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"power\"=\"generator\"][\"generator:source\"=\"solar\"];\n  way(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"power\"=\"generator\"][\"generator:method\"=\"photovoltaic\"];\n  way(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"generator:output:electricity\"];\n  way(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"generator:plant\"=\"solar\"];\n  way(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"generator:type\"=\"solar\"];\n  way(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"solar\"=\"yes\"];\n  way(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"power\"=\"plant\"][\"plant:source\"=\"solar\"];\n  way(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"generator:method\"=\"solar_photovoltaic\"];\n  way(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"location\"=\"roof\"][\"generator:source\"=\"solar\"];\n\n  relation(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"power\"=\"generator\"][\"generator:source\"=\"solar\"];\n  relation(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"power\"=\"generator\"][\"generator:method\"=\"photovoltaic\"];\n  relation(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"generator:output:electricity\"];\n  relation(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"generator:plant\"=\"solar\"];\n  relation(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"generator:type\"=\"solar\"];\n  relation(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"solar\"=\"yes\"];\n  relation(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"power\"=\"plant\"][\"plant:source\"=\"solar\"];\n  relation(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"generator:method\"=\"solar_photovoltaic\"];\n  relation(around:20,{{ $json.latitudine }},{{ $json.longitudine }})[\"location\"=\"roof\"][\"generator:source\"=\"solar\"];\n);\n\n// 🔁 Restituisce tutti i tag disponibili\nout tags;\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1888,
+        192
+      ],
+      "id": "9c8bd001-2cb7-4947-aeb0-13ff821d5378",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "YOUR_API",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "=location.latitude",
+              "value": "={{ $json.latitudine }}"
+            },
+            {
+              "name": "location.longitude",
+              "value": "={{ $json.longitudine }}"
+            },
+            {
+              "name": "key",
+              "value": "AIzaSyBe1GkrrfeDzOg2i51JK8WzNY9cBNO9HFg"
+            },
+            {
+              "name": "requiredQuality",
+              "value": "medium"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2080,
+        416
+      ],
+      "id": "c9a0d9d2-af6a-475e-86c7-8a57fb1ee683",
+    },
+    {
+      "parameters": {
+        "jsCode": "/**********************************************************************\n * Google Solar API → Output con unità di misura dentro le celle\n * Perfetto per Google Sheets o export leggibile\n **********************************************************************/\n\nconst data = $json;\nconst s = data.solarPotential || {};\nconst r = s.wholeRoofStats || {};\nconst firstSegment = s.roofSegmentStats?.[0] || {};\n\nconst areaTetto = r.areaMeters2 || null;\nconst areaInstallabile = s.maxArrayAreaMeters2 || null;\nconst pannelliMassimi = s.maxArrayPanelsCount || null;\nconst oreSoleAnnue = s.maxSunshineHoursPerYear || null;\nconst inclinazioneMedia = firstSegment.pitchDegrees || null;\nconst orientamentoMedio = firstSegment?.azimuthDegrees ?? 0;\nconst potenzaPannello = s.panelCapacityWatts || 400;\nconst vitaPannelli = s.panelLifetimeYears || 20;\n\n// 🔹 Calcolo base\nconst efficienza = 0.8;\nconst potenzaKWp = (pannelliMassimi * potenzaPannello) / 1000;\nconst produzioneAnnuaKWh = potenzaKWp * oreSoleAnnue * efficienza;\nconst costoKWp = 1200;\nconst investimento = potenzaKWp * costoKWp;\nconst prezzoKWh = 0.25;\nconst risparmioAnnuale = produzioneAnnuaKWh * prezzoKWh;\nconst paybackAnni = risparmioAnnuale > 0\n  ? Number((investimento / risparmioAnnuale).toFixed(1))\n  : null;\n\n// 🔹 Output con unità di misura dentro le celle\nreturn [{\n  json: {\n    edificio_id: data.name,\n    latitudine: `${data.center?.latitude.toFixed(6)} °`,\n    longitudine: `${data.center?.longitude.toFixed(6)} °`,\n    area_tetto: `${areaTetto?.toFixed(2)} m²`,\n    area_installabile: `${areaInstallabile?.toFixed(2)} m²`,\n    pannelli_massimi: `${pannelliMassimi} pannelli`,\n    potenza_kwp: `${potenzaKWp.toFixed(1)} kWp`,\n    ore_sole_annue: `${oreSoleAnnue.toFixed(0)} h/anno`,\n    inclinazione_media: `${inclinazioneMedia?.toFixed(1)} °`,\n    orientamento_medio: `${orientamentoMedio?.toFixed(1)} ° (0=N,180=S)`,\n    potenza_pannello: `${potenzaPannello} W`,\n    vita_pannelli: `${vitaPannelli} anni`,\n    produzione_annua: `${produzioneAnnuaKWh.toFixed(0)} kWh/anno`,\n    investimento: `${investimento.toLocaleString('it-IT')} €`,\n    risparmio_annuo: `${risparmioAnnuale.toLocaleString('it-IT')} €/anno`,\n    payback: `${paybackAnni} anni`\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        192
+      ],
+      "id": "882a3002-cd99-434e-97ef-be7c16aab1fe",
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_API",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\"\n}\n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{$json}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5008,
+        -64
+      ],
+      "id": "d1c0740c-82f1-4730-aeb6-7799f1a2e8f9",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "YOUR_CREDENTIAL",
+        },
+        "httpBearerAuth": {
+          "id": "YOUR_ID",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const elements = $json.elements || [];\nconst hasSolar = elements.some(\n  e => e.tags?.power === \"generator\" && e.tags?.[\"generator:source\"] === \"solar\"\n);\n\nreturn [{\n  json: {\n    latitudine: $json.latitudine,\n    longitudine: $json.longitudine,\n    has_fotovoltaico: hasSolar,\n    description: hasSolar\n      ? \"Impianto fotovoltaico rilevato (OSM)\"\n      : \"Nessun impianto fotovoltaico mappato\"\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        192
+      ],
+      "id": "51c1b640-c6df-4809-98d0-ba7339fa49ce",
+    },
+    {
+      "parameters": {
+        "jsCode": "// 🔹 Prende il testo grezzo\nconst text = $json.data;\n\n// 🔹 Helper function per cercare un valore dopo una label\nfunction getValue(regex, def = null) {\n  const match = text.match(regex);\n  return match ? parseFloat(match[1].replace(',', '.')) : def;\n}\n\n// 🔹 Estrae i dati principali\nconst lat = getValue(/Latitude \\(decimal degrees\\):\\s*([\\d\\.,\\-]+)/);\nconst lng = getValue(/Longitude \\(decimal degrees\\):\\s*([\\d\\.,\\-]+)/);\nconst potenza_kwp = getValue(/Nominal power of the PV system.*:\\s*([\\d\\.,\\-]+)/);\nconst perdite_sistema = getValue(/System losses.*:\\s*([\\d\\.,\\-]+)/);\nconst produzione_giornaliera = getValue(/Year\\s+([\\d\\.,]+)\\s+[\\d\\.,]+\\s+[\\d\\.,]+\\s+[\\d\\.,]+\\s+[\\d\\.,]+/);\nconst produzione_mensile = getValue(/Year\\s+[\\d\\.,]+\\s+([\\d\\.,]+)\\s+[\\d\\.,]+\\s+[\\d\\.,]+\\s+[\\d\\.,]+/);\nconst perdita_temp = getValue(/Temperature and low irradiance loss.*:\\s*([\\-\\d\\.,]+)/);\nconst perdita_combinata = getValue(/Combined loss.*:\\s*([\\-\\d\\.,]+)/);\n\n// 🔹 Calcola produzione annuale stimata (kWh/anno)\nconst produzione_annua = produzione_mensile * 12;\n\n// 🔹 Calcolo ROI (esempio base)\nconst costo_kwp = 1200; // €/kWp\nconst investimento = potenza_kwp * costo_kwp;\nconst prezzo_kwh = 0.25; // €/kWh\nconst risparmio_annuo = produzione_annua * prezzo_kwh;\nconst payback_anni = investimento / risparmio_annuo;\n\n// 🔹 Output finale\nreturn [{\n  json: {\n    lat,\n    lng,\n    potenza_kwp,\n    perdite_sistema,\n    produzione_giornaliera,\n    produzione_mensile,\n    produzione_annua,\n    perdita_temp,\n    perdita_combinata,\n    investimento,\n    risparmio_annuo,\n    payback_anni: payback_anni.toFixed(1),\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2688,
+        -208
+      ],
+      "id": "9429950f-257c-4341-bed2-70e77282a17c",
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3840,
+        -80
+      ],
+      "id": "6da19065-62de-4fac-9826-6617b58a1e09",
+    },
+    {
+      "parameters": {
+        "jsCode": "// === Function Node: Genera PDF Fotovoltaico (DynamicPDF) ===\n// Input: dati tecnici fotovoltaici + immagine satellitare in Base64\n// Output: JSON conforme a DynamicPDF schema\n\nconst input = $input.first().json;\n\n// --- Utility functions\nfunction normStr(v){ return (v===null||v===undefined) ? \"\" : String(v).trim(); }\nfunction escapeHtml(s){ return normStr(s).replace(/&/g,\"&amp;\").replace(/</g,\"&lt;\").replace(/>/g,\"&gt;\"); }\n\n// ---- Campi dinamici\nconst area_tetto        = normStr(input.area_tetto);\nconst area_installabile = normStr(input.area_installabile);\nconst pannelli_massimi  = normStr(input.pannelli_massimi);\nconst potenza_kwp       = normStr(input.potenza_kwp);\nconst ore_sole_annue    = normStr(input.ore_sole_annue);\nconst inclinazione_media= normStr(input.inclinazione_media);\nconst orientamento_medio= normStr(input.orientamento_medio);\nconst potenza_pannello  = normStr(input.potenza_pannello);\nconst vita_pannelli     = normStr(input.vita_pannelli);\nconst produzione_annua  = normStr(input.produzione_annua);\nconst investimento      = normStr(input.investimento);\nconst risparmio_annuo   = normStr(input.risparmio_annuo);\nconst payback           = normStr(input.payback);\nconst name              = normStr(input.name || \"\");\nconst full_address      = normStr(input.indirizzo || input.full_address || \"\");\nconst note              = normStr(input.note || \"\");\nconst description       = normStr(input.description || \"\");\nconst email             = normStr(input.email || input.email_1 || \"\");\nconst telefono          = normStr(input.telefono || input.phone || input.phone_1 || \"\");\nconst sito              = normStr(input.sito || input.site || \"\");\nconst content           = normStr(input.content || \"\");\n\n// presenza pannelli\nfunction firstSentence(text) {\n  if (!text) return \"\";\n  const match = text.trim().split(\".\")[0];\n  return match ? match.trim() + \".\" : text.trim();\n}\n\nconst pannelli_presenti = firstSentence(input.content || \"\");\n\n\n// ---- Recupero immagine\nlet base64Image = \"\";\nlet mimeType = \"image/jpeg\";\n\nif ($json.data && $json.data.length > 1000) {\n  base64Image = $json.data;\n} else if ($binary && $binary.data && $binary.data.data) {\n  base64Image = $binary.data.data;\n  mimeType = $binary.data.mimeType || \"image/jpeg\";\n} else if ($json.binary && $json.binary.data && $json.binary.data.data) {\n  base64Image = $json.binary.data.data;\n  mimeType = $json.binary.data.mimeType || \"image/jpeg\";\n}\n\n// ---- HTML per DynamicPDF\nconst html = `\n<!DOCTYPE html>\n<html lang=\"it\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Analisi Fotovoltaico - ${escapeHtml(name)}</title>\n<style>\n  body {\n    font-family: \"Segoe UI\", Roboto, Arial, sans-serif;\n    background: #f8f9fb;\n    color: #222;\n    margin: 0;\n    padding: 0;\n  }\n  .container {\n    max-width: 900px;\n    margin: 40px auto;\n    background: #fff;\n    border-radius: 12px;\n    box-shadow: 0 5px 20px rgba(0,0,0,0.08);\n    padding: 40px 60px;\n  }\n  header {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    border-bottom: 3px solid #00a859;\n    padding-bottom: 15px;\n    margin-bottom: 25px;\n  }\n  .logo {\n    font-size: 22px;\n    font-weight: 700;\n    color: #00a859;\n    text-transform: uppercase;\n    letter-spacing: 1px;\n  }\n  .report-title { font-size: 22px; font-weight: 600; color: #003366; margin-top: 20px; text-transform: capitalize; }\n  .address { font-size: 15px; color: #444; margin-top: 5px; }\n  .contact-box { background: #f3f7f5; border-radius: 8px; padding: 12px 18px; margin-top: 12px; }\n  .contact-box p { margin: 4px 0; font-size: 14px; }\n  .contact-box a { color: #00733e; text-decoration: none; }\n  .contact-box a:hover { text-decoration: underline; }\n  h2 { color: #00a859; font-size: 18px; margin-top: 35px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }\n  table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 10px; }\n  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: middle; }\n  th { background-color: #f3f7f5; color: #005c35; font-weight: 600; font-size: 14px; width: 35%; }\n  td { font-size: 14px; }\n  .highlight { font-weight: bold; color: #008000; }\n  .positive { color: #008000; font-weight: bold; }\n  .negative { color: #cc0000; font-weight: bold; }\n  footer { margin-top: 40px; font-size: 12px; color: #777; text-align: center; }\n  .summary-box { display: flex; justify-content: space-around; text-align: center; margin-top: 25px; }\n  .box { background: #f0f9f5; padding: 15px 20px; border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); width: 28%; }\n  .box h3 { margin: 0; color: #00a859; font-size: 22px; }\n  .box p { margin: 0; font-size: 13px; color: #555; }\n  .greenbar { height: 4px; width: 100%; background: linear-gradient(90deg, #00a859, #00cc77); border-radius: 3px; margin: 20px 0; }\n\n  /* 🔹 Immagine sempre nella prima pagina */\n  .image-box {\n    text-align: center;\n    margin-top: 20px;\n    page-break-inside: avoid;    /* Evita interruzioni di pagina */\n    page-break-before: avoid;\n    page-break-after: avoid;\n    overflow: hidden;            /* Se è troppo grande, si taglia */\n    max-height: 550px;           /* Regola l’altezza massima visibile */\n  }\n  .image-box img {\n    width: 100%;\n    height: auto;\n    object-fit: cover;           /* Mantiene proporzioni e taglia se serve */\n    border-radius: 10px;\n    box-shadow: 0 2px 8px rgba(0,0,0,0.15);\n  }\n  .image-caption {\n    font-size: 13px;\n    color: #666;\n    margin-top: 8px;\n  }\n</style>\n\n</head>\n\n<body>\n<div class=\"container\">\n  <header>\n    <div class=\"logo\">ANALISI FOTOVOLTAICO</div>\n    <div class=\"date\">${new Date().toLocaleDateString(\"it-IT\")}</div>\n  </header>\n\n  <div class=\"report-title\">${escapeHtml(name)}</div>\n  <div class=\"address\"><strong>📍 Indirizzo:</strong> ${escapeHtml(full_address)}</div>\n\n  ${(telefono || email || sito) ? `\n  <div class=\"contact-box\">\n    ${telefono ? `<p><strong>📞 Telefono:</strong> ${escapeHtml(telefono)}</p>` : \"\"}\n    ${email ? `<p><strong>📧 Email:</strong> <a href=\"mailto:${escapeHtml(email)}\">${escapeHtml(email)}</a></p>` : \"\"}\n    ${sito ? `<p><strong>🌐 Sito:</strong> <a href=\"${escapeHtml(sito.startsWith('http') ? sito : 'https://' + sito)}\" target=\"_blank\">${escapeHtml(sito)}</a></p>` : \"\"}\n  </div>` : \"\"}\n\n  <div class=\"greenbar\"></div>\n\n  <div class=\"summary-box\">\n    <div class=\"box\">\n      <h3>${escapeHtml(potenza_kwp)}</h3>\n      <p>Potenza Totale (kWp)</p>\n    </div>\n    <div class=\"box\">\n      <h3>${escapeHtml(produzione_annua)}</h3>\n      <p>Produzione Annua (kWh)</p>\n    </div>\n    <div class=\"box\">\n      <h3>${escapeHtml(payback)}</h3>\n      <p>Ritorno Investimento</p>\n    </div>\n  </div>\n\n  ${base64Image ? `\n  <div class=\"image-box\">\n    <img src=\"data:${mimeType};base64,${base64Image}\" alt=\"Immagine Satellitare\">\n    <div class=\"image-caption\">Immagine satellitare dell’edificio</div>\n  </div>` : \"\"}\n\n  <h2>Caratteristiche del Tetto</h2>\n  <table>\n    <tr><th>Superficie totale</th><td>${escapeHtml(area_tetto)}</td></tr>\n    <tr><th>Superficie installabile</th><td>${escapeHtml(area_installabile)}</td></tr>\n    <tr><th>Pannelli massimi</th><td>${escapeHtml(pannelli_massimi)}</td></tr>\n    <tr><th>Inclinazione media</th><td>${escapeHtml(inclinazione_media)}</td></tr>\n    <tr><th>Orientamento medio</th><td>${escapeHtml(orientamento_medio)}</td></tr>\n    <tr><th>Presenza di pannelli</th><td class=\"${input.has_fotovoltaico ? 'positive' : 'negative'}\">${escapeHtml(pannelli_presenti)}</td></tr>\n  </table>\n\n  <h2>Analisi Energetica</h2>\n  <table>\n    <tr><th>Ore di sole annue</th><td>${escapeHtml(ore_sole_annue)}</td></tr>\n    <tr><th>Potenza pannello</th><td>${escapeHtml(potenza_pannello)}</td></tr>\n    <tr><th>Vita utile pannelli</th><td>${escapeHtml(vita_pannelli)}</td></tr>\n    <tr><th>Produzione annua stimata</th><td class=\"highlight\">${escapeHtml(produzione_annua)}</td></tr>\n  </table>\n\n  <h2>Analisi Economica</h2>\n  <table>\n    <tr><th>Investimento stimato</th><td>${escapeHtml(investimento)}</td></tr>\n    <tr><th>Risparmio annuo</th><td>${escapeHtml(risparmio_annuo)}</td></tr>\n    <tr><th>Tempo di ritorno</th><td class=\"highlight\">${escapeHtml(payback)}</td></tr>\n  </table>\n\n  <footer>\n    Strategyfor Srl © ${new Date().getFullYear()}\n  </footer>\n</div>\n</body>\n</html>\n`;\n\n// ---- Output JSON per DynamicPDF ----\nreturn [{\n  json: {\n    \"$schema\": \"https://www.dynamicpdf.com/schemas/pdf.instructions.schema.json\",\n    author: \"Strategyfor\",\n    title: `Analisi Fotovoltaico - ${name}`,\n    creator: \"Matteo Zanetti\",\n    inputs: [\n      { type: \"html\", htmlString: html }\n    ]\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4432,
+        640
+      ],
+      "id": "e8d705c2-ad5c-474c-b037-3f54741d5018",
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\n// Restituisce solo il campo \"name\"\nreturn [{\n  json: {\n    name: input.name,\n    phone:input.phone,\n    email:input.email_1,\n    sito:input.site\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2608,
+        -384
+      ],
+      "id": "7cbfe208-fc7f-418a-b867-850a403a4821",
+    },
+    {
+      "parameters": {
+        "jsCode": "// Legge il JSON di input (la risposta dell'API Solar)\nconst input = $input.first().json;\n\n// Estrae solo il campo rgbUrl\nconst rgbUrl = input.rgbUrl;\n\n// Se vuoi già includere la chiave API\nconst apiKey = 'AIzaSyBe1GkrrfeDzOg2i51JK8WzNY9cBNO9HFg'; // <-- sostituisci con la tua\nconst fullUrl = rgbUrl ? `${rgbUrl}&key=${apiKey}` : null;\n\n// Restituisce solo l’URL completo dell’immagine\nreturn [{\n  json: {\n    image_url: fullUrl\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        624
+      ],
+      "id": "e85b2a2a-47a6-4cf2-80b0-bda36f6fe249",
+    },
+    {
+      "parameters": {
+        "operation": "resize",
+        "width": 475,
+        "height": 475,
+        "options": {
+          "format": "jpeg"
+        }
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        3216,
+        384
+      ],
+      "id": "f6ba01c8-a9d4-43f4-9619-ddec61af5e5b",
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        3456,
+        288
+      ],
+      "id": "d4863ac5-863c-4cd3-822b-2ecd04c9afc7",
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3104,
+        -224
+      ],
+      "id": "058ffd25-ce5e-48ae-9f36-2515d4229a1f",
+    },
+    {
+      "parameters": {
+        "jsCode": "// 🔹 Prende tutti i nodi collegati (anche 7 o più)\nconst inputs = $input.all();\n\nlet mergedJson = {};   // conterrà tutti i dati testuali/numerici\nlet base64Image = \"\";  // conterrà l'immagine in base64\nlet mimeType = \"\";     // tipo MIME dell'immagine\n\nfor (const item of inputs) {\n\n  // 🔹 1. Unisci tutti i JSON (non sovrascrive campi esistenti con undefined/null)\n  if (item.json) {\n    for (const [key, value] of Object.entries(item.json)) {\n      if (value !== undefined && value !== null && value !== \"\") {\n        mergedJson[key] = value;\n      }\n    }\n  }\n\n  // 🔹 2. Se l'input contiene un file binario (es. immagine), estrailo\n  if (item.binary) {\n    for (const [key, file] of Object.entries(item.binary)) {\n      if (file?.data && file?.mimeType?.startsWith(\"image/\")) {\n        base64Image = file.data;\n        mimeType = file.mimeType;\n      }\n    }\n  }\n}\n\n// 🔹 3. Se trovata un'immagine, aggiungila dentro al JSON\nif (base64Image) {\n  mergedJson.data = base64Image;\n  mergedJson.mimeType = mimeType;\n}\n\n// 🔹 4. Ritorna un solo JSON unificato\nreturn [{\n  json: mergedJson\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3424,
+        -256
+      ],
+      "id": "e220062d-94d3-4a2b-b914-76c6688b050b",
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3088,
+        0
+      ],
+      "id": "14fdabf2-bfd8-4b0b-89ab-afbff1a1eb9d",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// 🔹 Prende tutti i nodi collegati (anche 7 o più)\nconst inputs = $input.all();\n\nlet mergedJson = {};   // conterrà tutti i dati testuali/numerici\nlet base64Image = \"\";  // conterrà l'immagine in base64\nlet mimeType = \"\";     // tipo MIME dell'immagine\n\nfor (const item of inputs) {\n\n  // 🔹 1. Unisci tutti i JSON (non sovrascrive campi esistenti con undefined/null)\n  if (item.json) {\n    for (const [key, value] of Object.entries(item.json)) {\n      if (value !== undefined && value !== null && value !== \"\") {\n        mergedJson[key] = value;\n      }\n    }\n  }\n\n  // 🔹 2. Se l'input contiene un file binario (es. immagine), estrailo\n  if (item.binary) {\n    for (const [key, file] of Object.entries(item.binary)) {\n      if (file?.data && file?.mimeType?.startsWith(\"image/\")) {\n        base64Image = file.data;\n        mimeType = file.mimeType;\n      }\n    }\n  }\n}\n\n// 🔹 3. Se trovata un'immagine, aggiungila dentro al JSON\nif (base64Image) {\n  mergedJson.data = base64Image;\n  mergedJson.mimeType = mimeType;\n}\n\n// 🔹 4. Ritorna un solo JSON unificato\nreturn [{\n  json: mergedJson\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3424,
+        0
+      ],
+      "id": "4421ca8b-4f5e-46a6-bcfd-ec3aa7f92d9b",
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "text": "Analizzando il tetto di questo edificio, è presente un impianto fotovoltaico?",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        3456,
+        464
+      ],
+      "id": "a66d9651-9415-4755-b95b-ae9ac6478de3",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_ID",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "actorId": {
+          "__rl": true,
+          "value": "nwua9Gu5YrADL7ZDj",
+          "mode": "list",
+          "cachedResultName": "Google Maps Scraper (compass/crawler-google-places)",
+          "cachedResultUrl": "https://console.apify.com/actors/nwua9Gu5YrADL7ZDj/input"
+        },
+        "customBody": "={\n   \"categoryFilterWords\": [\n        \"manufacturer\",\n        \"industrial equipment supplier\",\n        \"metal fabricator\",\n        \"construction company\",\n        \"mechanic\",\n        \"warehouse\",\n        \"agricultural machinery manufacturer\",\n        \"farm\",\n        \"agriculture\",\n        \"builder\",\n        \"logistics service\",\n        \"company\",\n        \"energy supplier\",\n        \"power station\",\n        \"metal industry suppliers\",\n        \"shipping equipment industry\"\n    ],\n\"includeWebResults\": true,\n    \"language\": \"en\",\n    \"locationQuery\": \"{{ $json.Luogo }}\",\n    \"maxImages\": 0,\n    \"maxQuestions\": 999,\n   \"maxCrawledPlacesPerSearch\":{{ $json['numero contatti da cercare'] }},\n    \"scrapeContacts\": true,\n    \"scrapeDirectories\": false,\n    \"scrapeImageAuthors\": false,\n    \"scrapePlaceDetailPage\": false,\n    \"scrapeReviewsPersonalData\": false,\n    \"scrapeTableReservationProvider\": false,\n    \"searchStringsArray\": [\n    {{ $json.option }}\n    ],\n        \"skipClosedPlaces\": false\n}",
+        "timeout": {},
+        "memory": 4096
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        -2112,
+        352
+      ],
+      "id": "f7c6461c-f8d5-49eb-9bf0-de8424e56a15",
+      "credentials": {
+        "apifyApi": {
+          "id": "YOUR_ID",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "Get last run",
+        "userActorId": {
+          "__rl": true,
+          "value": "={{ $json.actId }}",
+          "mode": "id"
+        }
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        -1888,
+        352
+      ],
+      "id": "f06945fd-e55b-4a7d-b269-ed9279cfdc4b",
+      "credentials": {
+        "apifyApi": {
+          "id": "YOUR_ID",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Datasets",
+        "datasetId": "={{ $json.defaultDatasetId }}",
+        "offset": {},
+        "limit": 5000
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        352
+      ],
+      "id": "3e9363e1-89d6-42b2-ae03-b3204432c05d",
+      "alwaysOutputData": true,
+      "credentials": {
+        "apifyApi": {
+          "id": "YOUR_ID",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Trova Leads",
+        "formDescription": "per ottenere il corretto nome del luogo, utilizza questo link:\n\n<a href=\"https://nominatim.openstreetmap.org/search?q=%7D\">Mappa</a>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -3088,
+        128
+      ],
+      "id": "dde1b751-c572-45cf-9c22-5f495cdd22dc",
+      "webhookId": "064fe0ab-f795-4a62-8de9-d9ebd399a667"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prende tutte le righe dal nodo precedente\nconst rows = $input.all();\n\n// Oggetto temporaneo per raggruppare\nconst categories = {};\n\n// Scorri ogni riga del foglio\nfor (const item of rows) {\n  const row = item.json;\n\n  for (const [colonna, valore] of Object.entries(row)) {\n    // Escludi colonne non di interesse\n    if (colonna === 'row_number' || !valore) continue;\n\n    // Inizializza l'array della categoria se non esiste\n    if (!categories[colonna]) categories[colonna] = new Set();\n\n    // Aggiungi la sottocategoria\n    categories[colonna].add(valore.trim());\n  }\n}\n\n// Converti in array compatibile per JSON del form\nconst result = Object.entries(categories).map(([categoria, sottocategorie]) => ({\n  categoria,\n  sottocategorie: Array.from(sottocategorie).sort()\n}));\n\nreturn [\n  {\n    json: {\n      data: result\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2688,
+        128
+      ],
+      "id": "d336760f-0de5-451c-aff1-7cc838e2b5b6",
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "125O9Nj8pZ2fBvFbmPrjzX_nxT59aPdGsVL7tpmeJedU",
+          "mode": "list",
+          "cachedResultName": "categorie",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/125O9Nj8pZ2fBvFbmPrjzX_nxT59aPdGsVL7tpmeJedU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2022668042,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/125O9Nj8pZ2fBvFbmPrjzX_nxT59aPdGsVL7tpmeJedU/edit#gid=2022668042"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2880,
+        128
+      ],
+      "id": "0bf8f34a-63fa-4ed2-a153-ee9ae617fcdc",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_ID",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "defineForm": "json",
+        "jsonOutput": "=\n[\n  {\n    \"fieldLabel\": \"Luogo\",\n    \"fieldType\": \"text\",\n    \"placeholder\": \"Brescia, Lombardia, Italia\",\n    \"requiredField\": true\n  },\n  {\n    \"fieldLabel\": \"Query di ricerca\",\n    \"fieldType\": \"text\",\n    \"placeholder\": \"ristoranti, pizzerie\",\n    \"requiredField\": false\n  },\n  {\n    \"fieldLabel\": \"Numero contatti da cercare\",\n    \"fieldType\": \"number\",\n    \"placeholder\": \"10\",\n    \"requiredField\": true\n  },\n  {\n    \"fieldLabel\": \"Nome del file\",\n    \"fieldType\": \"text\",\n    \"placeholder\": \"Ristoranti_BS\",\n    \"requiredField\": true\n  },\n  {\n    \"fieldType\": \"html\",\n    \"html\": \"<h2>🏭 Industriale / Artigianale</h2>\"\n  },\n  {\n    \"fieldLabel\": \"Seleziona sottocategorie industriali\",\n    \"fieldType\": \"checkbox\",\n    \"fieldOptions\": {\n      \"values\": [\n        { \"option\": \"Tutte le attività industriali\" },\n         { \"option\": \"manufacturer\"},\n       { \"option\": \"industrial equipment supplier\"},\n        { \"option\":\"metal fabricator\"},\n        { \"option\":\"construction company\"},\n        { \"option\":\"mechanic\"},\n        { \"option\":\"warehouse\"},\n       { \"option\": \"agricultural machinery manufacturer\"},\n       { \"option\": \"farm\"},\n       { \"option\": \"agriculture\"},\n       { \"option\": \"builder\"},\n       { \"option\": \"logistics service\"},\n       { \"option\": \"company\"},\n       { \"option\": \"energy supplier\"},\n       { \"option\": \"power station\"},\n       { \"option\": \"metal industry suppliers\"},\n       { \"option\": \"shipping equipment industry\"}\n      ]\n    }\n  }\n]\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        -2496,
+        128
+      ],
+      "id": "81465c11-4256-4aa1-9eff-a26de45f1c8b",
+      "webhookId": "826aefab-6101-47fc-9783-dc4b4b4d4b5b"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $json;\n\n// 📦 Mappa completa categorie → sottocategorie (aggiornata e pulita)\nconst categorieMap = {\n  \"Seleziona sottocategorie industriali\": [\n    \"manufacturer\",\"industrial engineer\",\"industrial equipment supplier\",\n    \"construction company\",\"construction equipment supplier\",\"building materials supplier\",\n    \"metal fabricator\",\"metal industry suppliers\",\"machinery parts manufacturer\",\n    \"machinery manufacturer\",\"plastic manufacturer\",\"glass manufacturer\",\"printing service\",\n    \"auto repair shop\",\"auto body shop\",\"auto parts store\",\"mechanic\",\"car wash\",\n    \"vehicle repair shop\",\"truck repair shop\",\"warehouse\",\"warehouse store\",\"wood workshop\",\n    \"hardware store\",\"tool store\",\"engineering consultant\",\"power plant\",\n    \"solar energy company\",\"energy supplier\",\"logistics service\",\"distribution service\"\n  ],\n  \"Seleziona sottocategorie agricole\": [\n    \"farm\",\"dairy farm\",\"cattle farm\",\"vineyard\",\"greenhouse\",\n    \"agricultural cooperative\",\"agricultural service\",\"agricultural production\",\n    \"orchard\",\"fish farm\",\"organic farm\",\"livestock breeder\",\"livestock dealer\",\"livestock producer\"\n  ],\n  \"Seleziona sottocategorie turistiche\": [\n    \"hotel\",\"motel\",\"resort hotel\",\"guest house\",\"hostel\",\n    \"bed & breakfast\",\"holiday park\",\"campground\",\"villa\",\"lodge\",\"inn\"\n  ],\n  \"Seleziona sottocategorie commerciali\": [\n    \"restaurant\",\"pizzeria\",\"bar\",\"bakery\",\"butcher shop\",\"brewery\",\"cafeteria\",\n    \"supermarket\",\"food manufacturer\",\"food store\",\"deli\",\"distribution service\",\n    \"coffee shop\",\"ice cream shop\",\"pub\",\"fish restaurant\",\"fast food restaurant\"\n  ],\n  \"Seleziona sottocategorie aziendali\": [\n    \"office\",\"company\",\"corporate office\",\"business park\",\"real estate agency\",\n    \"consultant\",\"engineering consultant\",\"business center\",\"logistics service\",\n    \"warehouse store\",\"distribution service\"\n  ],\n  \"Seleziona sottocategorie pubbliche\": [\n    \"school\",\"college\",\"university\",\"training center\",\"hospital\",\"clinic\",\"medical center\",\n    \"government office\",\"municipal office\",\"council\",\"church\",\"cathedral\",\"monastery\",\n    \"public library\",\"community center\"\n  ],\n  \"Seleziona sottocategorie edili\": [\n    \"construction company\",\"building materials supplier\",\"builder\",\"contractor\",\n    \"roofing contractor\",\"real estate agency\",\"property developer\",\"home builder\",\n    \"landscaper\",\"land surveyor\",\"architect\",\"civil engineer\"\n  ],\n  \"Seleziona sottocategorie sportive\": [\n    \"gym\",\"fitness center\",\"swimming pool\",\"sports complex\",\"sports club\",\n    \"wellness center\",\"day spa\",\"recreation center\",\"tennis club\",\"golf club\",\"stadium\"\n  ]\n};\n\n// 🔍 Estrai solo le chiavi con sottocategorie dal form\nconst categorieKeys = Object.keys(input).filter(k => k.startsWith(\"Seleziona sottocategorie\"));\n\nlet allCategories = [];\n\nfor (const key of categorieKeys) {\n  const selections = input[key] || [];\n\n  // Se l'utente seleziona \"Tutte le attività ...\"\n  const hasAll = selections.some(v => v.toLowerCase().startsWith(\"tutte le\"));\n  if (hasAll) {\n    allCategories.push(...(categorieMap[key] || []));\n  } else {\n    allCategories.push(...selections);\n  }\n}\n\n// 🔹 Pulisci, deduplica e formatta per Apify (es. \"\\\"restaurant\\\"\")\nconst formatted = [...new Set(allCategories)]\n  .filter(Boolean)\n  .map(v => `\"${v.toLowerCase()}\"`);\n\n// 🆕 Aggiunge il campo option (formattato come \\\"...\\\")\nconst query = input[\"Query di ricerca\"] || \"\";\nconst option = query ? `\"${query.trim()}\"` : \"\";\n\n// ✅ Output finale\nreturn [\n  {\n    json: {\n      Luogo: input[\"Luogo\"] || \"\",\n      \"query di ricerca\": query,\n      \"numero contatti da cercare\": input[\"Numero contatti da cercare\"] || 0,\n      Categoria: formatted,\n      \"Nome del file\": input[\"Nome del file\"] || \"\",\n      submittedAt: input[\"submittedAt\"],\n      formMode: input[\"formMode\"],\n      option\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2288,
+        128
+      ],
+      "id": "8abdf5c3-3fcb-4377-8335-095b40d4ee94",
+    },
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "title": "={{ $json[\"Nome del file\"] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2096,
+        -48
+      ],
+      "id": "28fe6c27-9f3b-4312-b0e9-bed2098efcf6",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({\n  json: {\n    spreadsheetUrl: item.json.spreadsheetUrl\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1696,
+        -48
+      ],
+      "id": "4b060672-2478-40e9-9894-2dcda2b425d6",
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1376,
+        48
+      ],
+      "id": "db170af8-640c-42bf-8179-985b3d762535",
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all()\n  // elimina quelli senza address\n  .filter(item => item.json.address && item.json.address.trim() !== \"\")\n  .map((item, index) => { \n    const d = item.json;\n    \n    // Funzione di utilità per pulire il numero di telefono\n    const cleanPhone = (phone) => (phone || \"\").toString().replace(/[+.]/g, \"\");\n\n    const spreadsheetItem = $input.all().find(\n      i => (i.json && i.json.spreadsheetUrl) || i.spreadsheetUrl\n    ) || {};\n\n    const spreadsheetUrl = spreadsheetItem.json?.spreadsheetUrl || spreadsheetItem.spreadsheetUrl || null;\n\n    // Funzione per estrarre la provincia dall'indirizzo\n    const extractProvince = (address) => {\n      if (!address) return \"\";\n      const match = address.match(/(?:,|\\s)([A-Z]{2})(?:,|$| Italy)/);\n      return match ? match[1] : \"\";\n    };\n\n    return {\n      json: {\n        id: index + 1, // ID incrementale\n        name: d.title || \"\",\n        ENRICHED: false,\n        \"Linkedin?\": false,\n        \"Email?\": false,\n        \"Sito?\": false,\n        site: d.website || d.domain || \"\",\n        category: d.categoryName || \"\",\n        city: d.city || \"\",\n        state: extractProvince(d.address),\n        full_address: d.address || \"\",\n        description: \"\",\n        phone: cleanPhone(d.phone),\n        phone_1: cleanPhone(d.phoneUnformatted || (d.phones && d.phones[0])),\n        phone_2: cleanPhone((d.phones && d.phones[1]) || (d.phonesUncertain && d.phonesUncertain[0])),\n        phone_3: cleanPhone((d.phones && d.phones[2]) || (d.phonesUncertain && d.phonesUncertain[1])),\n        email_1: (d.emails && d.emails[0]) || \"\",\n        email_2: (d.emails && d.emails[1]) || \"\",\n        email_3: (d.emails && d.emails[2]) || \"\",\n        linkedin: (d.linkedIns && d.linkedIns[0]) || \"\",\n        linkedin_subline: \"\",\n        linkedin_about: \"\",\n        facebook: (d.facebooks && d.facebooks[0]) || \"\",\n        youtube: (d.youtubes && d.youtubes[0]) || \"\",\n        instagram: (d.instagrams && d.instagrams[0]) || \"\",\n        tiktok: (d.tiktoks && d.tiktoks[0]) || \"\",\n        type: d.categoryName || \"\",\n        subtypes: (d.categories && d.categories.join(\", \")) || \"\",\n        website_keywords: \"\",\n        website_description: \"\",\n        emails1_validator: \"\",\n        emails2_validator: \"\",\n        emails3_validator: \"\",\n        email_1_full_name: \"\",\n        email_2_full_name: \"\",\n        email_3_full_name: \"\",\n        spreadsheetUrl: spreadsheetUrl,\n\n        // ✅ NUOVO: valori di geolocalizzazione\n        latitudine: d.location?.lat || null,\n        longitudine: d.location?.lng || null\n      }\n    };\n  });\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        48
+      ],
+      "id": "47455b32-8c52-4093-89f9-aa28d10ead4a",
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_API",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "(text/plain)",
+        "body": "=[out:json][timeout:60000];way(around:30,{{$json.latitudine}},{{$json.longitudine}})[building];out tags;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        -448
+      ],
+      "id": "ad8345c2-e1e5-4e8e-94cc-257b3fba82c3",
+    },
+    {
+      "parameters": {
+        "jsCode": "// Accumulatore dei risultati finali\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json;\n\n  const elements = data.elements || [];\n  const buildingCounts = {};\n  let maxLevels = 0;\n\n  // Conta i tipi di building\n  for (const el of elements) {\n    if (el.tags && el.tags.building) {\n      const bType = el.tags.building;\n      buildingCounts[bType] = (buildingCounts[bType] || 0) + 1;\n\n      // Trova il livello massimo (se esiste)\n      if (el.tags[\"building:levels\"]) {\n        const lvl = parseInt(el.tags[\"building:levels\"]);\n        if (!isNaN(lvl) && lvl > maxLevels) maxLevels = lvl;\n      }\n    }\n  }\n\n  // Identifica tipo principale (quello più frequente)\n  const buildingTypeMain = Object.keys(buildingCounts).reduce(\n    (a, b) => (buildingCounts[a] > buildingCounts[b] ? a : b),\n    Object.keys(buildingCounts)[0] || null\n  );\n\n  // Regole semplificate per classificazione\n  const isIndipendente =\n    Object.keys(buildingCounts).length === 1 && buildingTypeMain === \"yes\";\n\n  results.push({\n    building_counts: buildingCounts,\n    building_type_main: buildingTypeMain,\n    max_building_levels: maxLevels,\n    is_indipendente: isIndipendente,\n    note: isIndipendente\n      ? \"Edificio indipendente o capannone\"\n      : \"Complesso o struttura mista\"\n  });\n}\n\n// Restituisce tutti i risultati come array\nreturn results.map(r => ({ json: r }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        -400
+      ],
+      "id": "e9af6609-4f59-4833-a723-31f01619ccf3",
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -336,
+        32
+      ],
+      "id": "b7b412b0-eb9d-45fa-ac76-e5776f26cd26",
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.spreadsheetUrl }}",
+          "mode": "url"
+        },
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "11NofYLPf4IwCb7cnqWvqPTO5gjDmxrNI",
+          "mode": "list",
+          "cachedResultName": "FTV_Project",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/11NofYLPf4IwCb7cnqWvqPTO5gjDmxrNI"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1536,
+        -176
+      ],
+      "id": "91d0e508-e6c5-4b2c-a1a4-6490bf1be44f",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_CREDENTIAL",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1280,
+        32
+      ],
+      "id": "45d37e69-ac8f-413b-8300-561a62ce427f",
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3f9dc8a2-24ec-40d6-83bd-89ceabb08726",
+              "rightValue": "=false",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        -432
+      ],
+      "id": "5d0ab304-6241-4b64-90d3-a0c0f83640fa",
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $json.spreadsheetUrl }}",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "SHEET_LINK"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        16
+      ],
+      "id": "cc7bbf39-43bf-4cc2-9ec8-274b7463dea5",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "SHEET LINK",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1At5q8rZXpTeiv715mIZ2lkM6geHzctoP3axErnF3jm0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "vita_pannelli": "={{ $json.vita_pannelli }}",
+            "orientamento_medio": "={{ $json.orientamento_medio }}",
+            "potenza_pannello": "={{ $json.potenza_pannello }}",
+            "inclinazione_media": "={{ $json.inclinazione_media }}",
+            "ore_sole_annue": "={{ $json.ore_sole_annue }}",
+            "pannelli_massimi": "={{ $json.pannelli_massimi }}",
+            "area_installabile": "={{ $json.area_installabile }}",
+            "area_tetto": "={{ $json.area_tetto }}",
+            "has_fotovoltaico": "={{ $json.has_fotovoltaico }}",
+            "risparmio_annuo": "={{ $json.risparmio_annuo }}",
+            "investimento": "={{ $json.investimento }}",
+            "produzione_annua": "={{ $json.produzione_annua }}",
+            "produzione_mensile": "={{ $json.produzione_mensile }}",
+            "produzione_giornaliera": "={{ $json.produzione_giornaliera }}",
+            "perdite_sistema": "={{ $json.perdite_sistema }}",
+            "potenza_kwp": "={{ $json.potenza_kwp }}",
+            "content": "={{ $json.content }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "subtypes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "indirizzo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "full_address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "latitudine",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "longitudine",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "phone_1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "phone_2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "phone_3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email_1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email_2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email_3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "linkedin",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "facebook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instagram",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "youtube",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "tiktok",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "site",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "website_keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "website_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "building_type_main",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "max_building_levels",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "is_indipendente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "spreadsheetUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ENRICHED",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Linkedin?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Sito?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "emails1_validator",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "emails2_validator",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "emails3_validator",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email_1_full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email_2_full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email_3_full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "lat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "lng",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "potenza_kwp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "perdite_sistema",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "produzione_giornaliera",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "produzione_mensile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "produzione_annua",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "investimento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "risparmio_annuo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payback_anni",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "has_fotovoltaico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "edificio_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "area_tetto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "area_installabile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pannelli_massimi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ore_sole_annue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "inclinazione_media",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "orientamento_medio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "potenza_pannello",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "vita_pannelli",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4576,
+        144
+      ],
+      "id": "44fb1cf4-3bd4-4e63-adc9-03ebd0e9eece",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -640,
+        -384
+      ],
+      "id": "3f114223-2b1d-4a04-b9cd-2f4736d1f28a",
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        -336
+      ],
+      "id": "58e76b9d-9da1-4a43-bfdc-23567e0729c0",
+      "webhookId": "20d50eec-3a7b-4b13-83e8-2ed3e8ab8299"
+    },
+    {
+      "parameters": {
+        "content": "# TEST FAILOVER RICHIESTE (IN LAVORAZIONE)\n",
+        "height": 720,
+        "width": 2272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -976,
+        -1344
+      ],
+      "id": "95d5f009-f975-40ea-bfea-9696da241c60",
+    },
+    {
+      "parameters": {
+        "batchSize": 3,
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -592,
+        -1056
+      ],
+      "id": "ce4365fc-5560-4d4d-a615-5ac8feff3d7b",
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_API",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "(text/plain)",
+        "body": "=[out:json][timeout:60000];way(around:30,{{$json.latitudine}},{{$json.longitudine}})[building];out tags;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -64,
+        -1200
+      ],
+      "id": "989ffea2-9846-4649-9449-2370084b0bd4",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        656,
+        -832
+      ],
+      "id": "56c77cb0-ba5e-478b-aae4-ce0317db791d",
+      "webhookId": "20d50eec-3a7b-4b13-83e8-2ed3e8ab8299"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b60b2c4b-43bb-4121-9c37-2267e8fe5b4d",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        -1344
+      ],
+      "id": "1fadeb3e-946f-423a-a065-49a2aa7a7bce",
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.targetServer }}",
+                    "rightValue": "0",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "f0a50117-0cbe-4ae2-b386-641b06167f1c"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e246ca5c-9daf-4d93-b8da-82da20a02dcb",
+                    "rightValue": "1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "40afcd30-7eb0-4901-887b-acce73e5eb9b",
+                    "rightValue": "2",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -336,
+        -1056
+      ],
+      "id": "3253ba88-784f-41da-a033-d86c16db5000",
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_API",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "(text/plain)",
+        "body": "=[out:json][timeout:60000];way(around:30,{{$json.latitudine}},{{$json.longitudine}})[building];out tags;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -64,
+        -816
+      ],
+      "id": "46329c6a-96c7-421a-a083-6c8f0509a01c",
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_API",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "(text/plain)",
+        "body": "=[out:json][timeout:60000];way(around:30,{{$json.latitudine}},{{$json.longitudine}})[building];out tags;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -64,
+        -1040
+      ],
+      "id": "6e17d1a5-4854-4e0c-b783-33393b55faed",
+    },
+    {
+      "parameters": {
+        "jsCode": "/*****************************************************\n * Function Node - Analisi edificio da Overpass API\n * Input: JSON come quello che hai incollato\n *****************************************************/\n\n// Legge i dati\nconst data = $json;\nconst elements = data.elements || [];\n\n// Se non ci sono elementi, restituisce un risultato neutro\nif (!elements.length) {\n  return [{\n    json: {\n      building_type_main: \"unknown\",\n      max_building_levels: 0,\n      is_indipendente: false,\n      note: \"Nessun edificio rilevato\"\n    }\n  }];\n}\n\n// Conta i tipi di edificio e individua il numero massimo di livelli\nlet buildingCount = {};\nlet maxLevels = 0;\n\nfor (const el of elements) {\n  const b = el.tags?.building || \"unknown\";\n  const levels = parseInt(el.tags?.[\"building:levels\"] || \"0\", 10);\n  if (levels > maxLevels) maxLevels = levels;\n  buildingCount[b] = (buildingCount[b] || 0) + 1;\n}\n\n// Ordina i tipi di edificio per frequenza\nconst sorted = Object.entries(buildingCount).sort((a, b) => b[1] - a[1]);\nconst buildingMain = sorted[0][0];\n\n// Logica per determinare indipendenza\nlet is_indipendente = false;\n\nif ([\"industrial\", \"detached\", \"house\", \"yes\"].includes(buildingMain) && maxLevels <= 2) {\n  is_indipendente = true;\n}\n\nif ([\"apartments\", \"residential\", \"roof\", \"commercial\"].includes(buildingMain) || maxLevels >= 3) {\n  is_indipendente = false;\n}\n\n// Risultato finale\nreturn [{\n  json: {\n    building_counts: buildingCount,\n    building_type_main: buildingMain,\n    max_building_levels: maxLevels,\n    is_indipendente,\n    note: is_indipendente\n      ? \"Edificio indipendente o capannone\"\n      : \"Probabile condominio o edificio multipiano\"\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        -1344
+      ],
+      "id": "74ab740e-adf0-421e-a1b0-e1f6939251ca",
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "177636e8-21e3-4de9-b617-d763cc67cd1b",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "46105472-141e-4560-878a-9c2f95a1bf2a",
+              "rightValue": "={{ $json.error.code }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        -1200
+      ],
+      "id": "b87ba2ff-5449-4f03-a1fd-b4d42c13dafd",
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "177636e8-21e3-4de9-b617-d763cc67cd1b",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        192,
+        -1040
+      ],
+      "id": "31c44580-7302-4822-804e-8ad58a6f5165",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "177636e8-21e3-4de9-b617-d763cc67cd1b",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        192,
+        -816
+      ],
+      "id": "e5bb1bb3-978e-40d0-83bd-1ed0d642d9a2",
+    },
+    {
+      "parameters": {
+        "jsCode": "// Funzione Function Node\nreturn items.map((item, index) => {\n  return {\n    json: {\n      ...item.json,\n      targetServer: index % 3 // 0 -> nodo1, 1 -> nodo2, 2 -> nodo3\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -848,
+        -1056
+      ],
+      "id": "88cac3f2-fabd-4899-b1c1-0e82b2baa2de",
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_API",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "(text/plain)",
+        "body": "=[out:json][timeout:60000];way(around:30,{{$json.latitudine}},{{$json.longitudine}})[building];out tags;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -384,
+        -368
+      ],
+      "id": "16ee0402-62a8-4030-9ab4-9c67ab0ec696",
+    },
+    {
+      "parameters": {
+        "content": "# FORM INPUT DATI ",
+        "height": 256,
+        "width": 976
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3152,
+        32
+      ],
+      "id": "5a666f73-91ec-48a5-8a3d-56415076ae83",
+    },
+    {
+      "parameters": {
+        "content": "# APIFY",
+        "height": 256,
+        "width": 816,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2272,
+        304
+      ],
+      "id": "28eb1713-d728-405a-ab60-8aeb7e377cbd",
+    },
+    {
+      "parameters": {
+        "content": "# CREAZIONE FOGLIO EXCEL",
+        "height": 352,
+        "width": 768,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2176,
+        -208
+      ],
+      "id": "9881a538-576d-41c4-a499-9ba71c385394",
+    },
+    {
+      "parameters": {
+        "content": "# CHECK EDIFICIO\n",
+        "height": 448,
+        "width": 1296
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        -560
+      ],
+      "id": "fd6b880f-de37-4166-a663-3096f541cec7",
+    },
+    {
+      "parameters": {
+        "content": "# CREAZIONE ID",
+        "height": 272,
+        "width": 432,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        -16
+      ],
+      "id": "da9d6cb8-e245-4c1f-be83-437bff033eab",
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        224,
+        352
+      ],
+      "id": "76ad3a34-256d-4524-9937-1f14a73aea9d",
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1d4q7jhtLhpESuWumhS9XrdTXuQP2OAmIo38OFGSziBA/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1d4q7jhtLhpESuWumhS9XrdTXuQP2OAmIo38OFGSziBA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        352
+      ],
+      "id": "9076e05c-8f91-4a67-87ec-b0fab1161eed",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// === Function Node: Genera PDF Fotovoltaico (DynamicPDF) ===\n// Input: dati tecnici fotovoltaici + immagine satellitare in Base64\n// Output: JSON conforme a DynamicPDF schema\n\nconst input = $input.first().json;\n\n// --- Utility functions\nfunction normStr(v){ return (v===null||v===undefined) ? \"\" : String(v).trim(); }\nfunction escapeHtml(s){ return normStr(s).replace(/&/g,\"&amp;\").replace(/</g,\"&lt;\").replace(/>/g,\"&gt;\"); }\n\n// ---- Campi dinamici\nconst area_tetto        = normStr(input.area_tetto);\nconst area_installabile = normStr(input.area_installabile);\nconst pannelli_massimi  = normStr(input.pannelli_massimi);\nconst potenza_kwp       = normStr(input.potenza_kwp);\nconst ore_sole_annue    = normStr(input.ore_sole_annue);\nconst inclinazione_media= normStr(input.inclinazione_media);\nconst orientamento_medio= normStr(input.orientamento_medio);\nconst potenza_pannello  = normStr(input.potenza_pannello);\nconst vita_pannelli     = normStr(input.vita_pannelli);\nconst produzione_annua  = normStr(input.produzione_annua);\nconst investimento      = normStr(input.investimento);\nconst risparmio_annuo   = normStr(input.risparmio_annuo);\nconst payback           = normStr(input.payback);\nconst name              = normStr(input.name || \"\");\nconst full_address      = normStr(input.indirizzo || input.full_address || \"\");\nconst email             = normStr(input.email || input.email_1 || \"\");\nconst telefono          = normStr(input.telefono || input.phone || input.phone_1 || \"\");\nconst sito              = normStr(input.sito || input.site || \"\");\nconst content           = normStr(input.content || \"\");\n\n// ---- Prima frase del contenuto (pannelli presenti / assenti)\nfunction firstSentence(text) {\n  if (!text) return \"\";\n  const match = text.trim().split(\".\")[0];\n  return match ? match.trim() + \".\" : text.trim();\n}\nconst pannelli_presenti = firstSentence(input.content || \"\");\n\n// ---- Recupero immagine\nlet base64Image = \"\";\nlet mimeType = \"image/jpeg\";\n\nif ($json.data && $json.data.length > 1000) {\n  base64Image = $json.data;\n} else if ($binary && $binary.data && $binary.data.data) {\n  base64Image = $binary.data.data;\n  mimeType = $binary.data.mimeType || \"image/jpeg\";\n} else if ($json.binary && $json.binary.data && $json.binary.data.data) {\n  base64Image = $json.binary.data.data;\n  mimeType = $json.binary.data.mimeType || \"image/jpeg\";\n}\n\n// ---- HTML per DynamicPDF\nconst html = `\n<!DOCTYPE html>\n<html lang=\"it\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Analisi Fotovoltaico - ${escapeHtml(name)}</title>\n<style>\n  body { font-family: \"Segoe UI\", Roboto, Arial, sans-serif; background: #f8f9fb; color: #222; margin: 0; padding: 0; }\n  .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); padding: 40px 60px; }\n  header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #00a859; padding-bottom: 15px; margin-bottom: 25px; }\n  .logo { font-size: 22px; font-weight: 700; color: #00a859; text-transform: uppercase; letter-spacing: 1px; }\n  .report-title { font-size: 22px; font-weight: 600; color: #003366; margin-top: 20px; text-transform: capitalize; }\n  .address { font-size: 15px; color: #444; margin-top: 5px; }\n  .contact-box { background: #f3f7f5; border-radius: 8px; padding: 12px 18px; margin-top: 12px; }\n  .contact-box p { margin: 4px 0; font-size: 14px; }\n  .contact-box a { color: #00733e; text-decoration: none; }\n  .contact-box a:hover { text-decoration: underline; }\n  h2 { color: #00a859; font-size: 18px; margin-top: 35px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }\n  table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 10px; }\n  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: middle; }\n  th { background-color: #f3f7f5; color: #005c35; font-weight: 600; font-size: 14px; width: 35%; }\n  td { font-size: 14px; }\n  .highlight { font-weight: bold; color: #008000; }\n  .positive { color: #008000; font-weight: bold; }\n  .negative { color: #cc0000; font-weight: bold; }\n  footer { margin-top: 40px; font-size: 12px; color: #777; text-align: center; }\n  .summary-box { display: flex; justify-content: space-around; text-align: center; margin-top: 25px; }\n  .box { background: #f0f9f5; padding: 15px 20px; border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); width: 28%; }\n  .box h3 { margin: 0; color: #00a859; font-size: 22px; }\n  .box p { margin: 0; font-size: 13px; color: #555; }\n  .greenbar { height: 4px; width: 100%; background: linear-gradient(90deg, #00a859, #00cc77); border-radius: 3px; margin: 20px 0; }\n\n  /* 🔹 Immagine: deve restare nella prima pagina, anche se tagliata */\n  .image-box {\n    text-align: center;\n    margin-top: 20px;\n    page-break-before: avoid;\n    page-break-after: avoid;\n    page-break-inside: avoid;\n    overflow: hidden;\n    height: 420px; /* taglia se troppo grande */\n    position: relative;\n  }\n  .image-box img {\n    width: 100%;\n    height: 100%;\n    object-fit: cover;\n    border-radius: 10px;\n    display: block;\n  }\n  .image-caption {\n    font-size: 13px;\n    color: #666;\n    margin-top: 8px;\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    right: 0;\n    background: rgba(255,255,255,0.7);\n    padding: 4px 0;\n  }\n\n  /* 🔹 Forza inizio nuova pagina dalla sezione \"Caratteristiche del Tetto\" */\n  .page-break {\n    page-break-before: always;\n  }\n</style>\n</head>\n\n<body>\n<div class=\"container\">\n  <header>\n    <div class=\"logo\">ANALISI FOTOVOLTAICO</div>\n    <div class=\"date\">${new Date().toLocaleDateString(\"it-IT\")}</div>\n  </header>\n\n  <div class=\"report-title\">${escapeHtml(name)}</div>\n  <div class=\"address\"><strong>📍 Indirizzo:</strong> ${escapeHtml(full_address)}</div>\n\n  ${(telefono || email || sito) ? `\n  <div class=\"contact-box\">\n    ${telefono ? `<p><strong>📞 Telefono:</strong> ${escapeHtml(telefono)}</p>` : \"\"}\n    ${email ? `<p><strong>📧 Email:</strong> <a href=\"mailto:${escapeHtml(email)}\">${escapeHtml(email)}</a></p>` : \"\"}\n    ${sito ? `<p><strong>🌐 Sito:</strong> <a href=\"${escapeHtml(sito.startsWith('http') ? sito : 'https://' + sito)}\" target=\"_blank\">${escapeHtml(sito)}</a></p>` : \"\"}\n  </div>` : \"\"}\n\n  <div class=\"greenbar\"></div>\n\n  <div class=\"summary-box\">\n    <div class=\"box\">\n      <h3>${escapeHtml(potenza_kwp)}</h3>\n      <p>Potenza Totale (kWp)</p>\n    </div>\n    <div class=\"box\">\n      <h3>${escapeHtml(produzione_annua)}</h3>\n      <p>Produzione Annua (kWh)</p>\n    </div>\n    <div class=\"box\">\n      <h3>${escapeHtml(payback)}</h3>\n      <p>Ritorno Investimento</p>\n    </div>\n  </div>\n\n  ${base64Image ? `\n  <div class=\"image-box\">\n    <img src=\"data:${mimeType};base64,${base64Image}\" alt=\"Immagine Satellitare\">\n    <div class=\"image-caption\">Immagine satellitare dell’edificio</div>\n  </div>` : \"\"}\n\n  <!-- 🔹 Forza salto pagina qui -->\n  <div class=\"page-break\"></div>\n\n  <h2>Caratteristiche del Tetto</h2>\n  <table>\n    <tr><th>Superficie totale</th><td>${escapeHtml(area_tetto)}</td></tr>\n    <tr><th>Superficie installabile</th><td>${escapeHtml(area_installabile)}</td></tr>\n    <tr><th>Pannelli massimi</th><td>${escapeHtml(pannelli_massimi)}</td></tr>\n    <tr><th>Inclinazione media</th><td>${escapeHtml(inclinazione_media)}</td></tr>\n    <tr><th>Orientamento medio</th><td>${escapeHtml(orientamento_medio)}</td></tr>\n    <tr><th>Presenza di pannelli</th><td class=\"${input.has_fotovoltaico ? 'positive' : 'negative'}\">${escapeHtml(pannelli_presenti)}</td></tr>\n  </table>\n\n  <h2>Analisi Energetica</h2>\n  <table>\n    <tr><th>Ore di sole annue</th><td>${escapeHtml(ore_sole_annue)}</td></tr>\n    <tr><th>Potenza pannello</th><td>${escapeHtml(potenza_pannello)}</td></tr>\n    <tr><th>Vita utile pannelli</th><td>${escapeHtml(vita_pannelli)}</td></tr>\n    <tr><th>Produzione annua stimata</th><td class=\"highlight\">${escapeHtml(produzione_annua)}</td></tr>\n  </table>\n\n  <h2>Analisi Economica</h2>\n  <table>\n    <tr><th>Investimento stimato</th><td>${escapeHtml(investimento)}</td></tr>\n    <tr><th>Risparmio annuo</th><td>${escapeHtml(risparmio_annuo)}</td></tr>\n    <tr><th>Tempo di ritorno</th><td class=\"highlight\">${escapeHtml(payback)}</td></tr>\n  </table>\n\n  <footer>\n    Strategyfor Srl © ${new Date().getFullYear()}\n  </footer>\n</div>\n</body>\n</html>\n`;\n\n// ---- Output JSON per DynamicPDF ----\nreturn [{\n  json: {\n    \"$schema\": \"https://www.dynamicpdf.com/schemas/pdf.instructions.schema.json\",\n    author: \"Strategyfor\",\n    title: `Analisi Fotovoltaico - ${name}`,\n    creator: \"Matteo Zanetti\",\n    inputs: [\n      { type: \"html\", htmlString: html }\n    ]\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4736,
+        -64
+      ],
+      "id": "4fda3d4d-00a3-4c96-a567-c924d9a1a516",
+    },
+    {
+      "parameters": {
+        "url": "YOUR_API",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "location.latitude",
+              "value": "={{ $json.latitudine }}"
+            },
+            {
+              "name": "location.longitude",
+              "value": "={{ $json.longitudine }}"
+            },
+            {
+              "name": "radiusMeters",
+              "value": "={{ $json.radius }}"
+            },
+            {
+              "name": "view",
+              "value": "FULL_LAYERS"
+            },
+            {
+              "name": "pixelSizeMeters",
+              "value": "0.5"
+            },
+            {
+              "name": "requiredQuality",
+              "value": "MEDIUM"
+            },
+            {
+              "name": "key",
+              "value": "AIzaSyBe1GkrrfeDzOg2i51JK8WzNY9cBNO9HFg"
+            }
+          ]
+        },
+        "options": {
+          "response": {}
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2000,
+        640
+      ],
+      "id": "2e133b32-8a5b-4d47-a142-0a85cc134507",
+    },
+    {
+      "parameters": {
+        "content": "# LETTURA EXCEL E GENERAZIONE PDF (MANUALE MOMENTANEAMENTE)\n",
+        "height": 1536,
+        "width": 4144,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        -480
+      ],
+      "id": "19a2c20f-97c1-4e31-bf27-29846aea908c",
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d9cc8b72-fc98-47e1-94f4-55c43d4b9306",
+              "value": "={{ \n  $json.building_type_main && [\"industrial\",\"warehouse\",\"commercial\",\"retail\"].includes($json.building_type_main)\n    ? 70\n    : $json.building_type_main && [\"house\",\"residential\",\"apartments\",\"yes\"].includes($json.building_type_main)\n      ? 25\n      : $json.category && /farm|agricol/i.test($json.category)\n        ? 80\n        : $json.building_type_main && [\"office\",\"school\",\"hospital\",\"public\"].includes($json.building_type_main)\n          ? 50\n          : !$json.building_type_main && $json.category && /farm|agricol/i.test($json.category)\n            ? 80\n            : 40\n}}\n",
+              "type": "string"
+            },
+            {
+              "id": "73efc8b9-bd15-460b-b761-2ee47aedde68",
+              "value": "={{    $json.building_type_main && [\"industrial\",\"warehouse\",\"commercial\",\"retail\"].includes($json.building_type_main)     ? \"area industriale o commerciale → raggio 70m\"     : $json.building_type_main && [\"house\",\"residential\",\"apartments\",\"yes\"].includes($json.building_type_main)       ? \"area residenziale → raggio 30m\"       : $json.category && /farm|agricol/i.test($json.category)         ? \"attività agricola → raggio 80m\"         : $json.building_type_main && [\"office\",\"school\",\"hospital\",\"public\"].includes($json.building_type_main)           ? \"edificio medio (uffici/scuola/ospedale) → raggio 50m\"           : !$json.building_type_main && $json.category && /farm|agricol/i.test($json.category)             ? \"area agricola senza dati OSM → raggio 80m\"             : \"nessun dato preciso → raggio medio 50m\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1504,
+        464
+      ],
+      "id": "c78a1103-9bbf-47a5-9dd1-3f19f4b1f9a2",
+    },
+    {
+      "parameters": {
+        "jsCode": "// Recupera il primo item in input\nconst item = $input.all()[0];\n\n// Verifica che il binary esista\nif (!item.binary || !item.binary.data) {\n  throw new Error(\"❌ Nessun file binario trovato in input.\");\n}\n\n// Modifica i metadati del file binario\nitem.binary.data.fileName = \"immagine_solare.tiff\";\nitem.binary.data.mimeType = \"image/tiff\";\n\n// Restituisci lo stesso item con binary aggiornato\nreturn [item];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3008,
+        480
+      ],
+      "id": "80de2237-4636-4969-8ded-64f4e268b481",
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.image_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2832,
+        560
+      ],
+      "id": "f39fb8be-f6f9-4f4a-a143-973efc4e4163",
+    },
+    {
+      "parameters": {
+        "jsCode": "// Array che conterrà tutti i risultati finali\nconst results = [];\n\n// Prepara una lista dei dati \"building\" (cioè quelli con le info sugli edifici)\nconst buildingData = items.find(i => i.json.building_counts) ? items.filter(i => i.json.building_counts) : [];\n\n// Loop principale su tutti gli input\nfor (const item of items) {\n  const data = item.json;\n\n  // Se l'elemento ha id (quindi è un'azienda), lo processiamo\n  if (data.id) {\n    // Trova eventuale record di edificio corrispondente (stesso indice o stessa posizione)\n    const building = buildingData[results.length]?.json || {};\n\n    // Crea oggetto finale unendo dati aziendali + info edificio\n    const finale = {\n      id: data.id,\n      name: data.name,\n      category: data.category,\n      type: data.type,\n      subtypes: data.subtypes,\n      indirizzo: data.full_address || data.indirizzo,\n      full_address: data.full_address,\n      city: data.city,\n      state: data.state,\n      latitudine: data.latitudine || null,\n      longitudine: data.longitudine || null,\n      description: data.description,\n      phone: data.phone,\n      phone_1: data.phone_1,\n      phone_2: data.phone_2,\n      phone_3: data.phone_3,\n      email_1: data.email_1,\n      email_2: data.email_2,\n      email_3: data.email_3,\n      linkedin: data.linkedin,\n      facebook: data.facebook,\n      instagram: data.instagram,\n      youtube: data.youtube,\n      tiktok: data.tiktok,\n      site: data.site,\n      website_keywords: data.website_keywords,\n      website_description: data.website_description,\n\n      // --- Dati edificio (se presenti)\n      building_type_main: building.building_type_main || \"\",\n      max_building_levels: building.max_building_levels || \"\",\n      is_indipendente: building.is_indipendente || false,\n      note: building.note || \"\",\n\n      spreadsheetUrl: data.spreadsheetUrl,\n      ENRICHED: data.ENRICHED,\n      \"Linkedin?\": data[\"Linkedin?\"],\n      \"Email?\": data[\"Email?\"],\n      \"Sito?\": data[\"Sito?\"],\n\n      emails1_validator: data.emails1_validator,\n      emails2_validator: data.emails2_validator,\n      emails3_validator: data.emails3_validator,\n      email_1_full_name: data.email_1_full_name,\n      email_2_full_name: data.email_2_full_name,\n      email_3_full_name: data.email_3_full_name\n    };\n\n    // Aggiungi al risultato\n    results.push({ json: finale });\n  }\n}\n\n// Restituisci tutti gli oggetti\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        32
+      ],
+      "id": "3fa0ad04-d3bf-4b12-a711-0ee4e3717847",
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "c0e2c0a8-aada-473c-8c3a-51de5b7a4b51",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1072,
+        768
+      ],
+      "id": "47961a04-91c7-420e-9346-0cd92e11cd17",
+      "webhookId": "c0e2c0a8-aada-473c-8c3a-51de5b7a4b51"
+    },
+    {
+      "parameters": {
+        "url": "YOUR_API",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "address",
+              "value": "={{ $json.full_address }}"
+            },
+            {
+              "name": "key",
+              "value": "AIzaSyCww_wPtctNdY6P-kEu9vOYUd9iClIIyso"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -48,
+        752
+      ],
+      "id": "617c2fb8-c9d9-413e-82f3-de1db7ff3aa2",
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -304,
+        752
+      ],
+      "id": "587685d4-174b-4983-99b8-7aaa0da9e2f7",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_API",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "(text/plain)",
+        "body": "=[out:json][timeout:60000];way(around:50,{{ $json.results[0].geometry.location.lat }},{{ $json.results[0].geometry.location.lng }})[building];out tags;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        224,
+        608
+      ],
+      "id": "9fd9f80d-b542-4d56-8625-5aa8a1191a06",
+    },
+    {
+      "parameters": {
+        "jsCode": "// Accumulatore dei risultati finali\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json;\n\n  const elements = data.elements || [];\n  const buildingCounts = {};\n  let maxLevels = 0;\n//\n  if (!elements.length) {\n  results.push({\n    building_counts: {},\n    building_type_main: null,\n    max_building_levels: null,\n    is_indipendente: null,\n    note: \"NESSUN edificio presente in OSM nel raggio selezionato\"\n  });\n  continue;\n}\n\n  // Conta i tipi di building\n  for (const el of elements) {\n    if (el.tags && el.tags.building) {\n      const bType = el.tags.building;\n      buildingCounts[bType] = (buildingCounts[bType] || 0) + 1;\n\n      // Trova il livello massimo (se esiste)\n      if (el.tags[\"building:levels\"]) {\n        const lvl = parseInt(el.tags[\"building:levels\"]);\n        if (!isNaN(lvl) && lvl > maxLevels) maxLevels = lvl;\n      }\n    }\n  }\n\n  // Identifica tipo principale (quello più frequente)\n  const buildingTypeMain = Object.keys(buildingCounts).reduce(\n    (a, b) => (buildingCounts[a] > buildingCounts[b] ? a : b),\n    Object.keys(buildingCounts)[0] || null\n  );\n\n  // Regole semplificate per classificazione\n  const isIndipendente =\n    Object.keys(buildingCounts).length === 1 && buildingTypeMain === \"yes\";\n\n  results.push({\n    building_counts: buildingCounts,\n    building_type_main: buildingTypeMain,\n    max_building_levels: maxLevels,\n    is_indipendente: isIndipendente,\n    note: isIndipendente\n      ? \"Edificio indipendente o capannone\"\n      : \"Complesso o struttura mista\"\n  });\n}\n\n// Restituisce tutti i risultati come array\nreturn results.map(r => ({ json: r }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        688
+      ],
+      "id": "6ac39bb7-0a7c-4fa1-a01c-94dccefac4b9",
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prendi solo il primo item\nconst first = items[0].json;\n\n// Estrai solo i dati che servono\nreturn [{\n  json: {\n    email: first.body.email,\n    full_address: first.body.full_address\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        928
+      ],
+      "id": "536a4513-f1bb-4d58-8fcf-16cce5ac0c22",
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        784,
+        880
+      ],
+      "id": "eaf66420-2911-4223-a6cd-b2e61e136f3d",
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = items[0].json;\n\nconst latitudine = data.results[0].geometry.location.lat;\nconst longitudine = data.results[0].geometry.location.lng;\n\nreturn [{\n  json: {\n    latitudine,\n    longitudine\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        816
+      ],
+      "id": "e17391c0-6e91-441d-81e1-af682b89869d",
+    },
+    {
+      "parameters": {
+        "jsCode": "const building = items[0].json;\nconst coords   = items[1].json;\nconst input    = items[2].json;\n\nreturn [{\n  json: {\n    email: input.email,\n    full_address: input.full_address,\n\n    latitudine: coords.latitudine,\n    longitudine: coords.longitudine,\n\n    building_counts: building.building_counts,\n    building_type_main: building.building_type_main,\n    max_building_levels: building.max_building_levels,\n    is_indipendente: building.is_indipendente,\n    note: building.note\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        448
+      ],
+      "id": "d0569c59-3c57-4614-8f98-333c9412c7be",
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1e0c4383-ddba-4cdd-899e-a5d86956d816",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4256,
+        -80
+      ],
+      "id": "e352afc9-82a6-4e6c-a131-ea1e5ba47a2e",
+    },
+    {
+      "parameters": {
+        "jsCode": "// === Function Node: Genera PDF Fotovoltaico (DynamicPDF) ===\n// Input: dati tecnici fotovoltaici + immagine satellitare in Base64\n// Output: JSON conforme a DynamicPDF schema\n\nconst input = $input.first().json;\n\n// --- Utility functions ---\nfunction normStr(v){ \n  return (v===null||v===undefined) ? \"\" : String(v).trim(); \n}\nfunction escapeHtml(s){ \n  return normStr(s)\n    .replace(/&/g,\"&amp;\")\n    .replace(/</g,\"&lt;\")\n    .replace(/>/g,\"&gt;\");\n}\nfunction isValidEmail(v){\n  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v);\n}\nfunction safeUrl(v){\n  if (!v) return \"\";\n  let u = v.trim();\n  if (!u.startsWith(\"http://\") && !u.startsWith(\"https://\")) {\n    u = \"https://\" + u;\n  }\n  return escapeHtml(u);\n}\n\n// ---- Campi dinamici ----\nconst area_tetto        = normStr(input.area_tetto);\nconst area_installabile = normStr(input.area_installabile);\nconst pannelli_massimi  = normStr(input.pannelli_massimi);\nconst potenza_kwp       = normStr(input.potenza_kwp);\nconst ore_sole_annue    = normStr(input.ore_sole_annue);\nconst inclinazione_media= normStr(input.inclinazione_media);\nconst orientamento_medio= normStr(input.orientamento_medio);\nconst potenza_pannello  = normStr(input.potenza_pannello);\nconst vita_pannelli     = normStr(input.vita_pannelli);\nconst produzione_annua  = normStr(input.produzione_annua);\nconst investimento      = normStr(input.investimento);\nconst risparmio_annuo   = normStr(input.risparmio_annuo);\nconst payback           = normStr(input.payback);\n\nconst name              = normStr(input.name || \"\");\nconst full_address      = normStr(input.indirizzo || input.full_address || \"\");\n\nlet emailCandidate      = normStr(input.email || input.email_1 || \"\");\nconst email             = isValidEmail(emailCandidate) ? emailCandidate : \"\";\n\nconst telefono          = normStr(input.telefono || input.phone || input.phone_1 || \"\");\nconst sito              = normStr(input.sito || input.site || \"\");\n\n// ---- Prima frase del contenuto ----\nfunction firstSentence(text) {\n  if (!text) return \"\";\n  const match = text.trim().split(\".\")[0];\n  return match ? match.trim() + \".\" : text.trim();\n}\nconst pannelli_presenti = firstSentence(input.content || \"\");\n\n// ---- Recupero immagine ----\nlet base64Image = \"\";\nlet mimeType = \"image/jpeg\";\n\nif ($json.data && $json.data.length > 1000) {\n  base64Image = $json.data;\n} else if ($binary?.data?.data) {\n  base64Image = $binary.data.data;\n  mimeType = $binary.data.mimeType || \"image/jpeg\";\n} else if ($json.binary?.data?.data) {\n  base64Image = $json.binary.data.data;\n  mimeType = $json.binary.data.mimeType || \"image/jpeg\";\n}\n\n// ---- HTML SICURO (come modello ELOGIO) ----\nconst fullHtml = `\n<!DOCTYPE html>\n<html lang=\"it\">\n<head>\n<meta charset=\"UTF-8\">\n<title>Analisi Fotovoltaico - ${escapeHtml(name)}</title>\n<style>\n  body { font-family: \"Segoe UI\", Roboto, Arial, sans-serif; background: #f8f9fb; color: #222; margin: 0; padding: 0; }\n  .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); padding: 40px 60px; }\n  header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #00a859; padding-bottom: 15px; margin-bottom: 25px; }\n  .logo { font-size: 22px; font-weight: 700; color: #00a859; text-transform: uppercase; letter-spacing: 1px; }\n  .report-title { font-size: 22px; font-weight: 600; color: #003366; margin-top: 20px; text-transform: capitalize; }\n  .address { font-size: 15px; color: #444; margin-top: 5px; }\n  .contact-box { background: #f3f7f5; border-radius: 8px; padding: 12px 18px; margin-top: 12px; }\n  .contact-box p { margin: 4px 0; font-size: 14px; }\n  .contact-box a { color: #00733e; text-decoration: none; }\n  .contact-box a:hover { text-decoration: underline; }\n  h2 { color: #00a859; font-size: 18px; margin-top: 35px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }\n  table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 10px; }\n  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; }\n  th { background-color: #f3f7f5; color: #005c35; font-weight: 600; font-size: 14px; width: 35%; }\n  .highlight { font-weight: bold; color: #008000; }\n  .positive { color: #008000; font-weight: bold; }\n  .negative { color: #cc0000; font-weight: bold; }\n  footer { margin-top: 40px; font-size: 12px; color: #777; text-align: center; }\n  .summary-box { display: flex; justify-content: space-around; text-align: center; margin-top: 25px; }\n  .box { background: #f0f9f5; padding: 15px 20px; border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); width: 28%; }\n  .box h3 { margin: 0; color: #00a859; font-size: 22px; }\n  .greenbar { height: 4px; width: 100%; background: linear-gradient(90deg, #00a859, #00cc77); border-radius: 3px; margin: 20px 0; }\n  .page-break { page-break-before: always; }\n  .image-box { text-align: center; margin-top: 20px; overflow: hidden; height: 420px; position: relative; }\n  .image-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }\n</style>\n</head>\n\n<body>\n<div class=\"container\">\n  <header>\n    <div class=\"logo\">ANALISI FOTOVOLTAICO</div>\n    <div class=\"date\">${new Date().toLocaleDateString(\"it-IT\")}</div>\n  </header>\n\n  <div class=\"report-title\">${escapeHtml(name)}</div>\n  <div class=\"address\"><strong>📍 Indirizzo:</strong> ${escapeHtml(full_address)}</div>\n\n  ${(telefono || email || sito) ? `\n  <div class=\"contact-box\">\n    ${telefono ? `<p><strong>📞 Telefono:</strong> ${escapeHtml(telefono)}</p>` : \"\"}\n    ${email ? `<p><strong>📧 Email:</strong> <a href=\"mailto:${escapeHtml(email)}\">${escapeHtml(email)}</a></p>` : \"\"}\n    ${sito ? `<p><strong>🌐 Sito:</strong> <a href=\"${safeUrl(sito)}\" target=\"_blank\">${escapeHtml(sito)}</a></p>` : \"\"}\n  </div>` : \"\"}\n\n  <div class=\"greenbar\"></div>\n\n  <div class=\"summary-box\">\n    <div class=\"box\"><h3>${escapeHtml(potenza_kwp)}</h3><p>Potenza Totale (kWp)</p></div>\n    <div class=\"box\"><h3>${escapeHtml(produzione_annua)}</h3><p>Produzione Annua (kWh)</p></div>\n    <div class=\"box\"><h3>${escapeHtml(payback)}</h3><p>Ritorno Investimento</p></div>\n  </div>\n\n  ${base64Image ? `\n  <div class=\"image-box\">\n    <img src=\"data:${mimeType};base64,${base64Image}\" alt=\"Immagine Satellitare\">\n  </div>` : \"\"}\n\n  <div class=\"page-break\"></div>\n\n  <h2>Caratteristiche del Tetto</h2>\n  <table>\n    <tr><th>Superficie totale</th><td>${escapeHtml(area_tetto)}</td></tr>\n    <tr><th>Superficie installabile</th><td>${escapeHtml(area_installabile)}</td></tr>\n    <tr><th>Pannelli massimi</th><td>${escapeHtml(pannelli_massimi)}</td></tr>\n    <tr><th>Inclinazione media</th><td>${escapeHtml(inclinazione_media)}</td></tr>\n    <tr><th>Orientamento medio</th><td>${escapeHtml(orientamento_medio)}</td></tr>\n    <tr><th>Presenza di pannelli</th><td class=\"${input.has_fotovoltaico ? 'positive' : 'negative'}\">${escapeHtml(pannelli_presenti)}</td></tr>\n  </table>\n\n  <h2>Analisi Energetica</h2>\n  <table>\n    <tr><th>Ore di sole annue</th><td>${escapeHtml(ore_sole_annue)}</td></tr>\n    <tr><th>Potenza pannello</th><td>${escapeHtml(potenza_pannello)}</td></tr>\n    <tr><th>Vita utile pannelli</th><td>${escapeHtml(vita_pannelli)}</td></tr>\n    <tr><th>Produzione annua stimata</th><td class=\"highlight\">${escapeHtml(produzione_annua)}</td></tr>\n  </table>\n\n  <h2>Analisi Economica</h2>\n  <table>\n    <tr><th>Investimento stimato</th><td>${escapeHtml(investimento)}</td></tr>\n    <tr><th>Risparmio annuo</th><td>${escapeHtml(risparmio_annuo)}</td></tr>\n    <tr><th>Tempo di ritorno</th><td class=\"highlight\">${escapeHtml(payback)}</td></tr>\n  </table>\n\n  <footer>Strategyfor Srl © ${new Date().getFullYear()}</footer>\n</div>\n</body>\n</html>\n`;\n\n// ---- Output JSON per DynamicPDF ----\n// ---- Output JSON per DynamicPDF (come modello ELOGIO) ----\nreturn [\n  {\n    json: {\n      ...input,\n      instructions: {\n        \"$schema\": \"https://www.dynamicpdf.com/schemas/pdf.instructions.schema.json\",\n        author: \"Strategyfor\",\n        title: `Analisi Fotovoltaico - ${name || \"Senza Nome\"}`,\n        creator: \"Matteo Zanetti\",\n\n        // 🔥 TEMPLATE WATERMARK\n        templates: [\n          {\n            id: \"watermarkTemplate\",\n            elements: [\n              {\n                type: \"text\",\n                value: \"FAC SIMILE\",\n                fontSize: 90,\n                opacity: 0.18,\n                rotation: 45,\n                x: 150,\n                y: 300,\n                evenPages: true,\n                oddPages: true\n              }\n            ]\n          }\n        ],\n\n        // 🔥 HTML con template applicato a ogni pagina\n        inputs: [\n          {\n            type: \"html\",\n            htmlString: fullHtml.replace(/\\u0000/g, \"\"),\n            applyTemplate: \"watermarkTemplate\"\n          }\n        ]\n      }\n    }\n  }\n];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4592,
+        -320
+      ],
+      "id": "c7fc04c0-7b1a-49b7-8ff1-2c74cd72196a",
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_API",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\"\n}\n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.instructions }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4800,
+        -400
+      ],
+      "id": "767a78e5-a4cf-4e4a-a497-923c1a0fd5f2",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "YOUR_CREDENTIAL",
+        },
+        "httpBearerAuth": {
+          "id": "X8oKBmcxMrzkgxjW",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Scheda Analisi Fotovoltaico",
+        "message": "=<!DOCTYPE html>\n<html lang=\"it\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Scheda Fotovoltaica</title>\n  <style>\n    body {\n      font-family: 'Helvetica Neue', Arial, sans-serif;\n      background-color: #f7f7f7;\n      color: #333;\n      padding: 30px;\n      line-height: 1.6;\n    }\n    .container {\n      background-color: #ffffff;\n      max-width: 600px;\n      margin: 0 auto;\n      padding: 30px 40px;\n      border-radius: 10px;\n      box-shadow: 0 3px 10px rgba(0,0,0,0.08);\n    }\n    h1 {\n      font-size: 22px;\n      color: #00a859;\n      text-align: center;\n      margin-top: 0;\n    }\n    p {\n      font-size: 15px;\n      color: #555;\n      margin-bottom: 18px;\n    }\n    .footer {\n      text-align: center;\n      font-size: 13px;\n      color: #888;\n      margin-top: 30px;\n    }\n  </style>\n</head>\n\n<body>\n  <div class=\"container\">\n    <h1>Scheda Fotovoltaica</h1>\n\n    <p>Buongiorno,</p>\n\n    <p>In allegato trovi la tua scheda fotovoltaica generata automaticamente dal sistema.</p>\n\n    <p>Cordiali saluti,<br>\n    <strong>Strategyfor</strong></p>\n\n    <div class=\"footer\">\n      © Strategyfor Srl – Sistema Analisi Fotovoltaica\n    </div>\n  </div>\n</body>\n</html>\n",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        4896,
+        -192
+      ],
+      "id": "6198993d-f068-4637-ae84-af15e27a1da2",
+      "webhookId": "894a0f0e-1c55-479a-af40-87dda7e19485",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_CREDENTIAL",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!DOCTYPE html>\n<html lang=\"it\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Grazie!</title>\n<style>\n  body {\n    background: #f3f7fa;\n    margin: 0;\n    font-family: 'Helvetica Neue', Arial, sans-serif;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    height: 100vh;\n  }\n  .box {\n    background: #ffffff;\n    padding: 40px;\n    max-width: 450px;\n    width: 90%;\n    text-align: center;\n    border-radius: 14px;\n    box-shadow: 0 6px 18px rgba(0,0,0,0.08);\n  }\n  .box img {\n    width: 90px;\n    margin-bottom: 20px;\n  }\n  h2 {\n    color: #0C71C3;\n    font-size: 24px;\n    margin-bottom: 10px;\n  }\n  p {\n    color: #555;\n    font-size: 17px;\n    line-height: 1.6;\n  }\n</style>\n</head>\n<body>\n<div class=\"box\">\n  <img src=\"https://cdn-icons-png.flaticon.com/512/190/190411.png\" alt=\"Check\">\n  <h2>Grazie! 🎉</h2>\n  <p>\n    Abbiamo ricevuto la tua richiesta.<br>\n    <strong>Controlla la tua casella di posta:</strong><br>\n    tra pochi istanti riceverai un’email con il risultato.\n  </p>\n</div>\n</body>\n</html>\n",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -880,
+        768
+      ],
+      "id": "ef86f378-8dd4-40eb-9dd8-92d3edc01fc4",
+    },
+    {
+      "parameters": {
+        "jsCode": "// === Function Node: Genera PDF Fotovoltaico (DynamicPDF) ===\n\nconst input = $input.first().json;\n\n// --- Utility functions ---\nfunction normStr(v){ \n  return (v===null||v===undefined) ? \"\" : String(v).trim(); \n}\nfunction escapeHtml(s){ \n  return normStr(s)\n    .replace(/&/g,\"&amp;\")\n    .replace(/</g,\"&lt;\")\n    .replace(/>/g,\"&gt;\");\n}\nfunction isValidEmail(v){\n  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v);\n}\nfunction safeUrl(v){\n  if (!v) return \"\";\n  let u = v.trim();\n  if (!u.startsWith(\"http://\") && !u.startsWith(\"https://\")) {\n    u = \"https://\" + u;\n  }\n  return escapeHtml(u);\n}\n\n// ---- Campi dinamici ----\nconst area_tetto        = normStr(input.area_tetto);\nconst area_installabile = normStr(input.area_installabile);\nconst pannelli_massimi  = normStr(input.pannelli_massimi);\nconst potenza_kwp       = normStr(input.potenza_kwp);\nconst ore_sole_annue    = normStr(input.ore_sole_annue);\nconst inclinazione_media= normStr(input.inclinazione_media);\nconst orientamento_medio= normStr(input.orientamento_medio);\nconst potenza_pannello  = normStr(input.potenza_pannello);\nconst vita_pannelli     = normStr(input.vita_pannelli);\nconst produzione_annua  = normStr(input.produzione_annua);\nconst investimento      = normStr(input.investimento);\nconst risparmio_annuo   = normStr(input.risparmio_annuo);\nconst payback           = normStr(input.payback);\n\nconst name              = normStr(input.name || \"\");\nconst full_address      = normStr(input.indirizzo || input.full_address || \"\");\n\nlet emailCandidate      = normStr(input.email || input.email_1 || \"\");\nconst email             = isValidEmail(emailCandidate) ? emailCandidate : \"\";\n\nconst telefono          = normStr(input.telefono || input.phone || input.phone_1 || \"\");\nconst sito              = normStr(input.sito || input.site || \"\");\n\n// ---- Prima frase del contenuto ----\nfunction firstSentence(text) {\n  if (!text) return \"\";\n  const match = text.trim().split(\".\")[0];\n  return match ? match.trim() + \".\" : text.trim();\n}\nconst pannelli_presenti = firstSentence(input.content || \"\");\n\n// ---- Recupero immagine ----\nlet base64Image = \"\";\nlet mimeType = \"image/jpeg\";\n\nif ($json.data && $json.data.length > 1000) {\n  base64Image = $json.data;\n} else if ($binary?.data?.data) {\n  base64Image = $binary.data.data;\n  mimeType = $binary.data.mimeType || \"image/jpeg\";\n} else if ($json.binary?.data?.data) {\n  base64Image = $json.binary.data.data;\n  mimeType = $json.binary.data.mimeType || \"image/jpeg\";\n}\n\n// === HTML COMPLETO CON WATERMARK CENTRATO SU TUTTE LE PAGINE ===\nconst fullHtml = `\n<!DOCTYPE html>\n<html lang=\"it\">\n<head>\n<meta charset=\"UTF-8\">\n<title>Analisi Fotovoltaico - ${escapeHtml(name)}</title>\n\n<style>\n  body { \n    font-family: \"Segoe UI\", Roboto, Arial, sans-serif;\n    background: #f8f9fb; \n    color: #222; \n    margin: 0; \n    padding: 0;\n    position: relative;\n    z-index: 1;\n  }\n\n  .container { \n    max-width: 900px;\n    margin: 40px auto;\n    background: #fff;\n    border-radius: 12px;\n    box-shadow: 0 5px 20px rgba(0,0,0,0.08);\n    padding: 40px 60px;\n    position: relative;\n    z-index: 10;\n  }\n\n  header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #00a859; padding-bottom: 15px; margin-bottom: 25px; }\n  .logo { font-size: 22px; font-weight: 700; color: #00a859; text-transform: uppercase; letter-spacing: 1px; }\n  .report-title { font-size: 22px; font-weight: 600; color: #003366; margin-top: 20px; text-transform: capitalize; }\n  .address { font-size: 15px; color: #444; margin-top: 5px; }\n  .contact-box { background: #f3f7f5; border-radius: 8px; padding: 12px 18px; margin-top: 12px; }\n  .contact-box p { margin: 4px 0; font-size: 14px; }\n  .contact-box a { color: #00733e; text-decoration: none; }\n  .contact-box a:hover { text-decoration: underline; }\n  h2 { color: #00a859; font-size: 18px; margin-top: 35px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }\n  table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 10px; }\n  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; }\n  th { background-color: #f3f7f5; color: #005c35; font-weight: 600; font-size: 14px; width: 35%; }\n  .highlight { font-weight: bold; color: #008000; }\n  .positive { color: #008000; font-weight: bold; }\n  .negative { color: #cc0000; font-weight: bold; }\n  footer { margin-top: 40px; font-size: 12px; color: #777; text-align: center; }\n  .summary-box { display: flex; justify-content: space-around; text-align: center; margin-top: 25px; }\n  .box { background: #f0f9f5; padding: 15px 20px; border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); width: 28%; }\n  .box h3 { margin: 0; color: #00a859; font-size: 22px; }\n  .greenbar { height: 4px; width: 100%; background: linear-gradient(90deg, #00a859, #00cc77); border-radius: 3px; margin: 20px 0; }\n  .page-break { page-break-before: always; }\n  .image-box { text-align: center; margin-top: 20px; overflow: hidden; height: 420px; position: relative; }\n  .image-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }\n</style>\n\n</head>\n\n<body>\n\n<!-- ⭐ WATERMARK PERFETTAMENTE CENTRATO SU TUTTE LE PAGINE -->\n<div style=\"\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%) rotate(-35deg);\n  font-size: 110px;\n  font-weight: bold;\n  color: rgba(255, 0, 0, 0.15);\n  z-index: 999999;\n  pointer-events: none;\n  white-space: nowrap;\n\">\n  FAC SIMILE\n</div>\n\n<div class=\"container\">\n\n  <header>\n    <div class=\"logo\">ANALISI FOTOVOLTAICO</div>\n    <div class=\"date\">${new Date().toLocaleDateString(\"it-IT\")}</div>\n  </header>\n\n  <div class=\"report-title\">${escapeHtml(name)}</div>\n  <div class=\"address\"><strong>📍 Indirizzo:</strong> ${escapeHtml(full_address)}</div>\n\n  ${(telefono || email || sito) ? `\n  <div class=\"contact-box\">\n    ${telefono ? `<p><strong>📞 Telefono:</strong> ${escapeHtml(telefono)}</p>` : \"\"}\n    ${email ? `<p><strong>📧 Email:</strong> <a href=\"mailto:${escapeHtml(email)}\">${escapeHtml(email)}</a></p>` : \"\"}\n    ${sito ? `<p><strong>🌐 Sito:</strong> <a href=\"${safeUrl(sito)}\" target=\"_blank\">${escapeHtml(sito)}</a></p>` : \"\"}\n  </div>` : \"\"}\n\n  <div class=\"greenbar\"></div>\n\n  <div class=\"summary-box\">\n    <div class=\"box\"><h3>${escapeHtml(potenza_kwp)}</h3><p>Potenza Totale (kWp)</p></div>\n    <div class=\"box\"><h3>${escapeHtml(produzione_annua)}</h3><p>Produzione Annua (kWh)</p></div>\n    <div class=\"box\"><h3>${escapeHtml(payback)}</h3><p>Ritorno Investimento</p></div>\n  </div>\n\n  ${base64Image ? `\n  <div class=\"image-box\">\n    <img src=\"data:${mimeType};base64,${base64Image}\" alt=\"Immagine Satellitare\">\n  </div>` : \"\"}\n\n  <div class=\"page-break\"></div>\n\n  <h2>Caratteristiche del Tetto</h2>\n  <table>\n    <tr><th>Superficie totale</th><td>${escapeHtml(area_tetto)}</td></tr>\n    <tr><th>Superficie installabile</th><td>${escapeHtml(area_installabile)}</td></tr>\n    <tr><th>Pannelli massimi</th><td>${escapeHtml(pannelli_massimi)}</td></tr>\n    <tr><th>Inclinazione media</th><td>${escapeHtml(inclinazione_media)}</td></tr>\n    <tr><th>Orientamento medio</th><td>${escapeHtml(orientamento_medio)}</td></tr>\n    <tr><th>Presenza di pannelli</th><td class=\"${input.has_fotovoltaico ? 'positive' : 'negative'}\">${escapeHtml(pannelli_presenti)}</td></tr>\n  </table>\n\n  <h2>Analisi Energetica</h2>\n  <table>\n    <tr><th>Ore di sole annue</th><td>${escapeHtml(ore_sole_annue)}</td></tr>\n    <tr><th>Potenza pannello</th><td>${escapeHtml(potenza_pannello)}</td></tr>\n    <tr><th>Vita utile pannelli</th><td>${escapeHtml(vita_pannelli)}</td></tr>\n    <tr><th>Produzione annua stimata</th><td class=\"highlight\">${escapeHtml(produzione_annua)}</td></tr>\n  </table>\n\n  <h2>Analisi Economica</h2>\n  <table>\n    <tr><th>Investimento stimato</th><td>${escapeHtml(investimento)}</td></tr>\n    <tr><th>Risparmio annuo</th><td>${escapeHtml(risparmio_annuo)}</td></tr>\n    <tr><th>Tempo di ritorno</th><td class=\"highlight\">${escapeHtml(payback)}</td></tr>\n  </table>\n\n  <footer>Strategyfor Srl © ${new Date().getFullYear()}</footer>\n\n</div>\n</body>\n</html>\n`;\n\n// === OUTPUT JSON ===\nreturn [\n  {\n    json: {\n      ...input,\n      instructions: {\n        \"$schema\": \"https://www.dynamicpdf.com/schemas/pdf.instructions.schema.json\",\n        author: \"Strategyfor\",\n        title: `Analisi Fotovoltaico - ${name || \"Senza Nome\"}`,\n        creator: \"Matteo Zanetti\",\n\n        // ⭐ TEMPLATE WATERMARK SICURO (NON SI SPEZZA MAI)\n        templates: [\n          {\n            id: \"watermarkTemplate\",\n            elements: [\n              {\n                type: \"text\",\n                value: \"FAC SIMILE\",\n                fontSize: 120,\n                opacity: 0.15,\n                rotation: 45,\n                x: 130,\n                y: 350,\n                evenPages: true,\n                oddPages: true\n              }\n            ]\n          }\n        ],\n\n        // ⭐ HTML + TEMPLATE SOVRAPPOSTO\n        inputs: [\n          {\n            type: \"html\",\n            htmlString: fullHtml.replace(/\\u0000/g, \"\"),\n            applyTemplate: \"watermarkTemplate\"\n          }\n        ]\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4256,
+        -656
+      ],
+      "id": "e9efdff8-6235-4e36-92f4-fdeb894d08d0",
+    },
+    {
+      "parameters": {
+        "name": "={{ $json.name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1WpnS86ql8mLO2sJPlDUZIbdV7-IyqqfS",
+          "mode": "list",
+          "cachedResultName": "pdf_catania",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1WpnS86ql8mLO2sJPlDUZIbdV7-IyqqfS"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5632,
+        -608
+      ],
+      "id": "8e5d0c1e-bfa8-4fdb-970c-bd0990015317",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_CREDENTIAL",
+        }
+      }
+    },
+    {
+      "parameters": {
+        "defineForm": "json",
+        "jsonOutput": "[\n  {\n    \"fieldLabel\": \"Potenza pannello (W)\",\n    \"fieldType\": \"number\",\n    \"placeholder\": \"es. 400\",\n    \"requiredField\": true\n  },\n  {\n    \"fieldLabel\": \"Vita utile pannelli (anni)\",\n    \"fieldType\": \"number\",\n    \"placeholder\": \"es. 20\",\n    \"requiredField\": true\n  },\n  {\n    \"fieldLabel\": \"Efficienza impianto\",\n    \"fieldType\": \"number\",\n    \"placeholder\": \"es. 0.80\",\n    \"requiredField\": true\n  },\n  {\n    \"fieldLabel\": \"Costo per kWp (€)\",\n    \"fieldType\": \"number\",\n    \"placeholder\": \"es. 1200\",\n    \"requiredField\": true\n  },\n  {\n    \"fieldLabel\": \"Prezzo energia (€ / kWh)\",\n    \"fieldType\": \"number\",\n    \"placeholder\": \"es. 0.25\",\n    \"requiredField\": true\n  },\n  {\n    \"fieldLabel\": \"Scenario di calcolo\",\n    \"fieldType\": \"dropdown\",\n    \"fieldOptions\": {\n      \"values\": [\n        { \"option\": \"Prudente\" },\n        { \"option\": \"Standard\" },\n        { \"option\": \"Ottimistico\" }\n      ]\n    }\n  },\n  {\n    \"fieldLabel\": \"Note configurazione\",\n    \"fieldType\": \"textarea\",\n    \"placeholder\": \"Annotazioni opzionali per il report\"\n  }\n]\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        2352,
+        416
+      ],
+      "id": "6791c234-3fbf-4168-9798-1a2156c5031b",
+      "webhookId": "19661626-9b45-4b64-9959-b434e69d6d54"
+    },
+    {
+      "parameters": {
+        "jsCode": "/**********************************************************************\n * Google Solar API + Form dinamico (STABILE n8n)\n * - Gestione output form (array)\n * - Override parametri statici\n * - Nessun crash su valori null\n **********************************************************************/\n\n/* =========================\n   FUNZIONI DI SICUREZZA\n========================= */\nfunction safeNumber(value, fallback = null) {\n  return typeof value === \"number\" && !isNaN(value) ? value : fallback;\n}\n\nfunction safeFixed(value, decimals = 0, fallback = \"n.d.\") {\n  return typeof value === \"number\" && !isNaN(value)\n    ? value.toFixed(decimals)\n    : fallback;\n}\n\n/* =========================\n   INPUT\n========================= */\nconst input = $json;\n\n// Se arriva array (output form), prendo il primo elemento\nconst form = Array.isArray(input) ? input[0] : input;\n\n/* =========================\n   GOOGLE SOLAR API\n========================= */\nconst s = form.solarPotential || {};\nconst r = s.wholeRoofStats || {};\nconst firstSegment = s.roofSegmentStats?.[0] || {};\n\n// Dati tetto\nconst areaTetto = safeNumber(r.areaMeters2);\nconst areaInstallabile = safeNumber(s.maxArrayAreaMeters2);\nconst pannelliMassimi = safeNumber(s.maxArrayPanelsCount);\nconst oreSoleAnnue = safeNumber(s.maxSunshineHoursPerYear);\nconst inclinazioneMedia = safeNumber(firstSegment.pitchDegrees);\nconst orientamentoMedio = safeNumber(firstSegment.azimuthDegrees, 0);\n\n/* =========================\n   PARAMETRI DA FORM (OVERRIDE)\n========================= */\nconst potenzaPannello =\n  Number(form[\"Potenza pannello (W)\"]) > 0\n    ? Number(form[\"Potenza pannello (W)\"])\n    : safeNumber(s.panelCapacityWatts, 400);\n\nconst vitaPannelli =\n  Number(form[\"Vita utile pannelli (anni)\"]) > 0\n    ? Number(form[\"Vita utile pannelli (anni)\"])\n    : safeNumber(s.panelLifetimeYears, 20);\n\nconst efficienza =\n  Number(form[\"Efficienza impianto\"]) > 0\n    ? Number(form[\"Efficienza impianto\"])\n    : 0.8;\n\nconst costoKWp =\n  Number(form[\"Costo per kWp (€)\"]) > 0\n    ? Number(form[\"Costo per kWp (€)\"])\n    : 1200;\n\nconst prezzoKWh =\n  Number(form[\"Prezzo energia (€ / kWh)\"]) > 0\n    ? Number(form[\"Prezzo energia (€ / kWh)\"])\n    : 0.25;\n\n/* =========================\n   CALCOLI\n========================= */\nconst potenzaKWp =\n  pannelliMassimi && potenzaPannello\n    ? (pannelliMassimi * potenzaPannello) / 1000\n    : null;\n\nconst produzioneAnnuaKWh =\n  potenzaKWp && oreSoleAnnue\n    ? potenzaKWp * oreSoleAnnue * efficienza\n    : null;\n\nconst investimento =\n  potenzaKWp ? potenzaKWp * costoKWp : null;\n\nconst risparmioAnnuale =\n  produzioneAnnuaKWh ? produzioneAnnuaKWh * prezzoKWh : null;\n\nconst paybackAnni =\n  investimento && risparmioAnnuale\n    ? Number((investimento / risparmioAnnuale).toFixed(1))\n    : null;\n\n/* =========================\n   OUTPUT\n========================= */\nreturn [{\n  json: {\n    edificio_id: $('HTTP Request1').first().json.name || form.name || null,\n\n    latitudine: `${safeFixed(form.center?.latitude, 6)} °`,\n    longitudine: `${safeFixed(form.center?.longitude, 6)} °`,\n\n    area_tetto: `${safeFixed(areaTetto, 2)} m²`,\n    area_installabile: `${safeFixed(areaInstallabile, 2)} m²`,\n    pannelli_massimi: pannelliMassimi ? `${pannelliMassimi} pannelli` : \"n.d.\",\n    potenza_kwp: `${safeFixed(potenzaKWp, 1)} kWp`,\n    ore_sole_annue: `${safeFixed(oreSoleAnnue, 0)} h/anno`,\n    inclinazione_media: `${safeFixed(inclinazioneMedia, 1)} °`,\n    orientamento_medio: `${safeFixed(orientamentoMedio, 1)} ° (0=N,180=S)`,\n\n    potenza_pannello: `${potenzaPannello} W`,\n    vita_pannelli: `${vitaPannelli} anni`,\n\n    produzione_annua: `${safeFixed(produzioneAnnuaKWh, 0)} kWh/anno`,\n    investimento: investimento\n      ? `${investimento.toLocaleString(\"it-IT\")} €`\n      : \"n.d.\",\n    risparmio_annuo: risparmioAnnuale\n      ? `${risparmioAnnuale.toLocaleString(\"it-IT\")} €/anno`\n      : \"n.d.\",\n    payback: paybackAnni ? `${paybackAnni} anni` : \"n.d.\",\n\n    scenario: form[\"Scenario di calcolo\"] || \"Standard\",\n    note: form[\"Note configurazione\"] || \"\",\n    submittedAt: form.submittedAt || null,\n    formMode: form.formMode || null\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2656,
+        400
+      ],
+      "id": "1a8df9af-bad0-474f-9ea8-44fe29b1d54f",
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "matteozanetti.app.n8n.cloud",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
+            "content-length": "109",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-encoding": "gzip, br",
+            "accept-language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7,de;q=0.6",
+            "cache-control": "max-age=0",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "2.47.3.73",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "IT",
+            "cf-ray": "99e52662a3a6edb4-MXP",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/x-www-form-urlencoded",
+            "origin": "null",
+            "priority": "u=0, i",
+            "sec-ch-ua": "\"Chromium\";v=\"142\", \"Google Chrome\";v=\"142\", \"Not_A Brand\";v=\"99\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "cross-site",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "x-forwarded-for": "2.47.3.73, 172.70.216.190",
+            "x-forwarded-host": "matteozanetti.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-55-69f456d475-5jcj8",
+            "x-is-trusted": "yes",
+            "x-real-ip": "2.47.3.73"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "email": "giorgio.vittorio.fiorini@gmail.com",
+            "full_address": "Via Arduino Casale, 87, 10010 Lessolo TO, Italy"
+          },
+          "webhookUrl": "https://matteozanetti.app.n8n.cloud/webhook/c0e2c0a8-aada-473c-8c3a-51de5b7a4b51",
+          "executionMode": "production"
+        }
+      }
+    ],
+    "Append or update row in sheet1": [
+      {
+        "json": {
+          "name": "First item",
+          "code": 1
+        }
+      },
+      {
+        "json": {
+          "name": "Second item",
+          "code": 2
+        }
+      }
+    ]
+  },
+  "connections": {
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "calcolo roi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "unione risultati": {
+      "main": [
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "overpass api1": {
+      "main": [
+        [
+          {
+            "node": "rilevazione impianto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "solar api": {
+      "main": [
+        []
+      ]
+    },
+    "api pdf2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "rilevazione impianto": {
+      "main": [
+        []
+      ]
+    },
+    "calcolo roi": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "unione risultati",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "creazione pdf": {
+      "main": [
+        []
+      ]
+    },
+    "nome azienda": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "estrapola_rbg_url": {
+      "main": [
+        [
+          {
+            "node": "image to data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Run an Actor": {
+      "main": [
+        [
+          {
+            "node": "Get last run2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "test form": {
+      "main": [
+        [
+          {
+            "node": "lettura filtri",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "unificazione filtri": {
+      "main": [
+        [
+          {
+            "node": "ftv ricerca",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lettura filtri": {
+      "main": [
+        [
+          {
+            "node": "unificazione filtri",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ftv ricerca": {
+      "main": [
+        [
+          {
+            "node": "pulizia input apify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pulizia input apify": {
+      "main": [
+        [
+          {
+            "node": "Run an Actor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create spreadsheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get last run2": {
+      "main": [
+        [
+          {
+            "node": "Get dataset items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get dataset items2": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create spreadsheet1": {
+      "main": [
+        [
+          {
+            "node": "nome file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "nome file1": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Move file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "dati azienda+id_incrementale1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dati azienda+id_incrementale1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "overpass api2": {
+      "main": [
+        []
+      ]
+    },
+    "check edificio1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge4": {
+      "main": [
+        [
+          {
+            "node": "pulizia input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move file": {
+      "main": [
+        []
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "nome azienda",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "modifica raggio immagine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "overpass api5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [
+          {
+            "node": "check edificio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "overpass api": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [],
+        []
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "overpass api",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "overpass api4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "overpass api3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "overpass api4": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "overpass api3": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check edificio": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calcolo target server": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "overpass api5": {
+      "main": [
+        [
+          {
+            "node": "check edificio1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet1": {
+      "main": [
+        []
+      ]
+    },
+    "creazione pdf1": {
+      "main": [
+        [
+          {
+            "node": "api pdf2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generazione immagine1": {
+      "main": [
+        [
+          {
+            "node": "estrapola_rbg_url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "modifica raggio immagine": {
+      "main": [
+        [
+          {
+            "node": "generazione immagine1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "from .tiff to binary": {
+      "main": [
+        [
+          {
+            "node": "Edit Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "image to data": {
+      "main": [
+        [
+          {
+            "node": "from .tiff to binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pulizia input": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "overpass api6",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "overpass api6": {
+      "main": [
+        [
+          {
+            "node": "check edificio2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge6",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "check edificio2": {
+      "main": [
+        [
+          {
+            "node": "Merge6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge6": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Merge6",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "creazione pdf2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "creazione pdf1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "creazione pdf2": {
+      "main": [
+        [
+          {
+            "node": "api pdf",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "api pdf": {
+      "main": [
+        [
+          {
+            "node": "Upload file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Merge5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "fac simile": {
+      "main": [
+        [
+          {
+            "node": "api pdf",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Form": {
+      "main": [
+        [
+          {
+            "node": "solar api1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "solar api1": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ea822f35-5947-47fb-9d3e-497503809d40",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "660880f982623eeaace6744b2306a46f4f544ee6aea73031f45b63423714d204"
+  },
+  "id": "I5OpkHliT8i207rD",
+}
